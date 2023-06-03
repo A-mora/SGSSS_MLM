@@ -1,0 +1,771 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+<meta charset="utf-8" />
+<meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
+
+
+<meta name="author" content="Patricio Troncoso and Ana Morales-Gómez" />
+
+
+<title>Intro to MLM: Practical 2</title>
+
+<script src="site_libs/header-attrs-2.20/header-attrs.js"></script>
+<script src="site_libs/jquery-3.6.0/jquery-3.6.0.min.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link href="site_libs/bootstrap-3.3.5/css/cosmo.min.css" rel="stylesheet" />
+<script src="site_libs/bootstrap-3.3.5/js/bootstrap.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/html5shiv.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/respond.min.js"></script>
+<style>h1 {font-size: 34px;}
+       h1.title {font-size: 38px;}
+       h2 {font-size: 30px;}
+       h3 {font-size: 24px;}
+       h4 {font-size: 18px;}
+       h5 {font-size: 16px;}
+       h6 {font-size: 12px;}
+       code {color: inherit; background-color: rgba(0, 0, 0, 0.04);}
+       pre:not([class]) { background-color: white }</style>
+<script src="site_libs/jqueryui-1.11.4/jquery-ui.min.js"></script>
+<link href="site_libs/tocify-1.9.1/jquery.tocify.css" rel="stylesheet" />
+<script src="site_libs/tocify-1.9.1/jquery.tocify.js"></script>
+<script src="site_libs/navigation-1.1/tabsets.js"></script>
+<script src="site_libs/navigation-1.1/codefolding.js"></script>
+<script src="site_libs/navigation-1.1/sourceembed.js"></script>
+<link href="site_libs/highlightjs-9.12.0/default.css" rel="stylesheet" />
+<script src="site_libs/highlightjs-9.12.0/highlight.js"></script>
+
+<style type="text/css">
+  code{white-space: pre-wrap;}
+  span.smallcaps{font-variant: small-caps;}
+  span.underline{text-decoration: underline;}
+  div.column{display: inline-block; vertical-align: top; width: 50%;}
+  div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+  ul.task-list{list-style: none;}
+    </style>
+
+<style type="text/css">code{white-space: pre;}</style>
+<script type="text/javascript">
+if (window.hljs) {
+  hljs.configure({languages: []});
+  hljs.initHighlightingOnLoad();
+  if (document.readyState && document.readyState === "complete") {
+    window.setTimeout(function() { hljs.initHighlighting(); }, 0);
+  }
+}
+</script>
+
+
+
+
+<style type="text/css">
+#rmd-source-code {
+  display: none;
+}
+</style>
+
+
+
+
+
+<style type = "text/css">
+.main-container {
+  max-width: 940px;
+  margin-left: auto;
+  margin-right: auto;
+}
+img {
+  max-width:100%;
+}
+.tabbed-pane {
+  padding-top: 12px;
+}
+.html-widget {
+  margin-bottom: 20px;
+}
+button.code-folding-btn:focus {
+  outline: none;
+}
+summary {
+  display: list-item;
+}
+details > summary > p:only-child {
+  display: inline;
+}
+pre code {
+  padding: 0;
+}
+</style>
+
+
+<style type="text/css">
+.dropdown-submenu {
+  position: relative;
+}
+.dropdown-submenu>.dropdown-menu {
+  top: 0;
+  left: 100%;
+  margin-top: -6px;
+  margin-left: -1px;
+  border-radius: 0 6px 6px 6px;
+}
+.dropdown-submenu:hover>.dropdown-menu {
+  display: block;
+}
+.dropdown-submenu>a:after {
+  display: block;
+  content: " ";
+  float: right;
+  width: 0;
+  height: 0;
+  border-color: transparent;
+  border-style: solid;
+  border-width: 5px 0 5px 5px;
+  border-left-color: #cccccc;
+  margin-top: 5px;
+  margin-right: -10px;
+}
+.dropdown-submenu:hover>a:after {
+  border-left-color: #adb5bd;
+}
+.dropdown-submenu.pull-left {
+  float: none;
+}
+.dropdown-submenu.pull-left>.dropdown-menu {
+  left: -100%;
+  margin-left: 10px;
+  border-radius: 6px 0 6px 6px;
+}
+</style>
+
+<script type="text/javascript">
+// manage active state of menu based on current page
+$(document).ready(function () {
+  // active menu anchor
+  href = window.location.pathname
+  href = href.substr(href.lastIndexOf('/') + 1)
+  if (href === "")
+    href = "index.html";
+  var menuAnchor = $('a[href="' + href + '"]');
+
+  // mark the anchor link active (and if it's in a dropdown, also mark that active)
+  var dropdown = menuAnchor.closest('li.dropdown');
+  if (window.bootstrap) { // Bootstrap 4+
+    menuAnchor.addClass('active');
+    dropdown.find('> .dropdown-toggle').addClass('active');
+  } else { // Bootstrap 3
+    menuAnchor.parent().addClass('active');
+    dropdown.addClass('active');
+  }
+
+  // Navbar adjustments
+  var navHeight = $(".navbar").first().height() + 15;
+  var style = document.createElement('style');
+  var pt = "padding-top: " + navHeight + "px; ";
+  var mt = "margin-top: -" + navHeight + "px; ";
+  var css = "";
+  // offset scroll position for anchor links (for fixed navbar)
+  for (var i = 1; i <= 6; i++) {
+    css += ".section h" + i + "{ " + pt + mt + "}\n";
+  }
+  style.innerHTML = "body {" + pt + "padding-bottom: 40px; }\n" + css;
+  document.head.appendChild(style);
+});
+</script>
+
+<!-- tabsets -->
+
+<style type="text/css">
+.tabset-dropdown > .nav-tabs {
+  display: inline-table;
+  max-height: 500px;
+  min-height: 44px;
+  overflow-y: auto;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+.tabset-dropdown > .nav-tabs > li.active:before, .tabset-dropdown > .nav-tabs.nav-tabs-open:before {
+  content: "\e259";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li.active:before {
+  content: "\e258";
+  font-family: 'Glyphicons Halflings';
+  border: none;
+}
+
+.tabset-dropdown > .nav-tabs > li.active {
+  display: block;
+}
+
+.tabset-dropdown > .nav-tabs > li > a,
+.tabset-dropdown > .nav-tabs > li > a:focus,
+.tabset-dropdown > .nav-tabs > li > a:hover {
+  border: none;
+  display: inline-block;
+  border-radius: 4px;
+  background-color: transparent;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li {
+  display: block;
+  float: none;
+}
+
+.tabset-dropdown > .nav-tabs > li {
+  display: none;
+}
+</style>
+
+<!-- code folding -->
+<style type="text/css">
+.code-folding-btn { margin-bottom: 4px; }
+</style>
+
+
+
+<style type="text/css">
+
+#TOC {
+  margin: 25px 0px 20px 0px;
+}
+@media (max-width: 768px) {
+#TOC {
+  position: relative;
+  width: 100%;
+}
+}
+
+@media print {
+.toc-content {
+  /* see https://github.com/w3c/csswg-drafts/issues/4434 */
+  float: right;
+}
+}
+
+.toc-content {
+  padding-left: 30px;
+  padding-right: 40px;
+}
+
+div.main-container {
+  max-width: 1200px;
+}
+
+div.tocify {
+  width: 20%;
+  max-width: 260px;
+  max-height: 85%;
+}
+
+@media (min-width: 768px) and (max-width: 991px) {
+  div.tocify {
+    width: 25%;
+  }
+}
+
+@media (max-width: 767px) {
+  div.tocify {
+    width: 100%;
+    max-width: none;
+  }
+}
+
+.tocify ul, .tocify li {
+  line-height: 20px;
+}
+
+.tocify-subheader .tocify-item {
+  font-size: 0.90em;
+}
+
+.tocify .list-group-item {
+  border-radius: 0px;
+}
+
+
+</style>
+
+
+
+</head>
+
+<body>
+
+
+<div class="container-fluid main-container">
+
+
+<!-- setup 3col/9col grid for toc_float and main content  -->
+<div class="row">
+<div class="col-xs-12 col-sm-4 col-md-3">
+<div id="TOC" class="tocify">
+</div>
+</div>
+
+<div class="toc-content col-xs-12 col-sm-8 col-md-9">
+
+
+
+
+<div class="navbar navbar-default  navbar-fixed-top" role="navigation">
+  <div class="container">
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-bs-toggle="collapse" data-target="#navbar" data-bs-target="#navbar">
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="index.html">Multilevel Model</a>
+    </div>
+    <div id="navbar" class="navbar-collapse collapse">
+      <ul class="nav navbar-nav">
+        <li>
+  <a href="index.html">Home</a>
+</li>
+<li>
+  <a href="Practical_1.html">Practical 1</a>
+</li>
+<li>
+  <a href="Practical_2.html">Practical 2</a>
+</li>
+<li>
+  <a href="Practical_3.html">Practical 3</a>
+</li>
+<li>
+  <a href="Practical_4.html">Practical 4</a>
+</li>
+<li>
+  <a href="Solutions.html">Solutions</a>
+</li>
+      </ul>
+      <ul class="nav navbar-nav navbar-right">
+        
+      </ul>
+    </div><!--/.nav-collapse -->
+  </div><!--/.container -->
+</div><!--/.navbar -->
+
+<div id="header">
+
+<div class="btn-group pull-right float-right">
+<button type="button" class="btn btn-default btn-xs btn-secondary btn-sm dropdown-toggle" data-toggle="dropdown" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><span>Code</span> <span class="caret"></span></button>
+<ul class="dropdown-menu dropdown-menu-right" style="min-width: 50px;">
+<li><a id="rmd-download-source" href="#">Download Rmd</a></li>
+</ul>
+</div>
+
+
+
+<h1 class="title toc-ignore">Intro to MLM: Practical 2</h1>
+<h4 class="author">Patricio Troncoso and Ana Morales-Gómez</h4>
+<h4 class="date">June 2023</h4>
+
+</div>
+
+
+<div id="random-intercepts-model" class="section level1">
+<h1>Random intercepts model</h1>
+<p>Following up from what we were doing in practical 1, we’ll continue
+building up our multilevel model for school effects.</p>
+<hr />
+</div>
+<div id="task-1-value-added-model" class="section level1">
+<h1>Task 1: Value-added model</h1>
+<p>Fit a model with “prior attainment” as the only covariate. According
+to the literature this is a “type AA” value-added model. According to
+the DfE, this is a school value-added model or “VA”</p>
+<pre class="r"><code>m1 &lt;-lmer(ks4stand ~ ks2stand + (1|schoolID), data = valueadded, REML = F)
+summary(m1)</code></pre>
+<pre><code>## Linear mixed model fit by maximum likelihood  [&#39;lmerMod&#39;]
+## Formula: ks4stand ~ ks2stand + (1 | schoolID)
+##    Data: valueadded
+## 
+##      AIC      BIC   logLik deviance df.resid 
+##  94184.3  94214.5 -47088.2  94176.3    14048 
+## 
+## Scaled residuals: 
+##     Min      1Q  Median      3Q     Max 
+## -4.8324 -0.5431  0.0227  0.5858  4.6552 
+## 
+## Random effects:
+##  Groups   Name        Variance Std.Dev.
+##  schoolID (Intercept)  8.884   2.981   
+##  Residual             44.207   6.649   
+## Number of obs: 14052, groups:  schoolID, 628
+## 
+## Fixed effects:
+##              Estimate Std. Error t value
+## (Intercept) -0.110626   0.132210  -0.837
+## ks2stand     0.644306   0.006298 102.298
+## 
+## Correlation of Fixed Effects:
+##          (Intr)
+## ks2stand 0.006</code></pre>
+<div id="question" class="section level3">
+<h3>Question:</h3>
+<p>1.1. What is the effect of by prior attainment?</p>
+<p><br></p>
+<hr />
+</div>
+</div>
+<div id="task-2-contextualised-value-added-model"
+class="section level1">
+<h1>Task 2: Contextualised value-added model</h1>
+<p>Fit a model with all the available level 1 variables. In the
+literature, this model is called “type AA” value-added. The DfE would
+this model a “contextualised value-added model” or “CVA”.</p>
+<pre class="r"><code>m2 &lt;- lmer(ks4stand ~ ks2stand + factor(gender) + factor(fsm) + (1|schoolID), data = valueadded, REML = F)
+summary(m2)</code></pre>
+<pre><code>## Linear mixed model fit by maximum likelihood  [&#39;lmerMod&#39;]
+## Formula: ks4stand ~ ks2stand + factor(gender) + factor(fsm) + (1 | schoolID)
+##    Data: valueadded
+## 
+##      AIC      BIC   logLik deviance df.resid 
+##  91571.5  91616.7 -45779.8  91559.5    13740 
+## 
+## Scaled residuals: 
+##     Min      1Q  Median      3Q     Max 
+## -5.0675 -0.5341  0.0103  0.5770  4.8736 
+## 
+## Random effects:
+##  Groups   Name        Variance Std.Dev.
+##  schoolID (Intercept)  8.984   2.997   
+##  Residual             42.304   6.504   
+## Number of obs: 13746, groups:  schoolID, 628
+## 
+## Fixed effects:
+##                  Estimate Std. Error t value
+## (Intercept)     -0.547500   0.148461  -3.688
+## ks2stand         0.622985   0.006357  98.005
+## factor(gender)1  1.911990   0.118926  16.077
+## factor(fsm)1    -2.271849   0.157245 -14.448
+## 
+## Correlation of Fixed Effects:
+##             (Intr) ks2stn fctr(g)1
+## ks2stand    -0.023                
+## fctr(gndr)1 -0.394 -0.033         
+## factr(fsm)1 -0.215  0.183 -0.005</code></pre>
+<div id="questions" class="section level3">
+<h3>Questions</h3>
+<p>2.1. How much have the variances (at both levels) reduced?</p>
+<p>2.2. What does this mean for the concept of value-added?</p>
+<p><br></p>
+<hr />
+</div>
+</div>
+<div id="task-3-differential-progress---interaction-effects"
+class="section level1">
+<h1>Task 3: Differential progress - Interaction effects</h1>
+<div id="question-1" class="section level3">
+<h3>Question:</h3>
+<p>3.1. Do male and female pupils have different levels of progress?</p>
+<pre class="r"><code>m3 &lt;- lmer(ks4stand ~ ks2stand + ks2stand*factor(gender) + factor(gender)+
+           factor(fsm) + (1|schoolID), data = valueadded, REML = F)
+
+summary(m3)</code></pre>
+<pre><code>## Linear mixed model fit by maximum likelihood  [&#39;lmerMod&#39;]
+## Formula: ks4stand ~ ks2stand + ks2stand * factor(gender) + factor(gender) +  
+##     factor(fsm) + (1 | schoolID)
+##    Data: valueadded
+## 
+##      AIC      BIC   logLik deviance df.resid 
+##  91571.8  91624.5 -45778.9  91557.8    13739 
+## 
+## Scaled residuals: 
+##     Min      1Q  Median      3Q     Max 
+## -5.0469 -0.5340  0.0103  0.5770  4.8719 
+## 
+## Random effects:
+##  Groups   Name        Variance Std.Dev.
+##  schoolID (Intercept)  8.976   2.996   
+##  Residual             42.300   6.504   
+## Number of obs: 13746, groups:  schoolID, 628
+## 
+## Fixed effects:
+##                           Estimate Std. Error t value
+## (Intercept)              -0.544662   0.148432  -3.669
+## ks2stand                  0.630388   0.008533  73.874
+## factor(gender)1           1.911635   0.118920  16.075
+## factor(fsm)1             -2.272931   0.157238 -14.455
+## ks2stand:factor(gender)1 -0.015305   0.011776  -1.300
+## 
+## Correlation of Fixed Effects:
+##             (Intr) ks2stn fctr(g)1 fctr(f)1
+## ks2stand    -0.008                         
+## fctr(gndr)1 -0.394 -0.026                  
+## factr(fsm)1 -0.215  0.133 -0.005           
+## ks2stnd:()1 -0.015 -0.667  0.002    0.005</code></pre>
+<p>3.2. Do FSM eligible pupils make more or less progress?</p>
+<pre class="r"><code>m4 &lt;- lmer(ks4stand ~ ks2stand + ks2stand*factor(fsm) + factor(gender)+
+           factor(fsm) + (1|schoolID), data = valueadded, REML = F)
+
+summary(m4)</code></pre>
+<pre><code>## Linear mixed model fit by maximum likelihood  [&#39;lmerMod&#39;]
+## Formula: ks4stand ~ ks2stand + ks2stand * factor(fsm) + factor(gender) +  
+##     factor(fsm) + (1 | schoolID)
+##    Data: valueadded
+## 
+##      AIC      BIC   logLik deviance df.resid 
+##  91556.1  91608.8 -45771.0  91542.1    13739 
+## 
+## Scaled residuals: 
+##     Min      1Q  Median      3Q     Max 
+## -5.0963 -0.5351  0.0088  0.5752  4.8744 
+## 
+## Random effects:
+##  Groups   Name        Variance Std.Dev.
+##  schoolID (Intercept)  8.962   2.994   
+##  Residual             42.253   6.500   
+## Number of obs: 13746, groups:  schoolID, 628
+## 
+## Fixed effects:
+##                       Estimate Std. Error t value
+## (Intercept)           -0.56386    0.14836  -3.801
+## ks2stand               0.63557    0.00703  90.410
+## factor(fsm)1          -2.51428    0.16752 -15.009
+## factor(gender)1        1.91338    0.11885  16.099
+## ks2stand:factor(fsm)1 -0.06332    0.01516  -4.178
+## 
+## Correlation of Fixed Effects:
+##             (Intr) ks2stn fctr(f)1 fctr(g)1
+## ks2stand    -0.033                         
+## factr(fsm)1 -0.193  0.007                  
+## fctr(gndr)1 -0.394 -0.028 -0.005           
+## ks2stnd:()1  0.026 -0.428  0.346   -0.003</code></pre>
+<p><br></p>
+<hr />
+</div>
+</div>
+<div id="task-4-school-level-variables" class="section level1">
+<h1>Task 4: School-level variables</h1>
+<p>One of the strengths of MLM is that we can evaluate the effect of
+multiple variables at different levels on the outcome of interest.
+Adding higher-level variables is done in the same way as any other
+individual-level variable.</p>
+<p>We can easily create a new school-level variable from the dataset we
+have if we aggregate pupil-level data. The code below uses the function
+<code>mutate</code> of the <code>dplyr</code> package to create a new
+variable that represents the percentage of pupils eligible for free
+school meals in each school:</p>
+<pre class="r"><code>valueadded &lt;- valueadded %&gt;%
+  group_by(schoolID) %&gt;%
+  mutate(schoolfsm = mean(fsm, na.rm = T)*100)</code></pre>
+<p>You can inspect the results by clicking on the object
+<code>valueadded</code> that is in your Environment tab.</p>
+<p>After that, we’re ready to fit the model with
+<code>schoolfsm</code>.</p>
+<pre class="r"><code>m5 &lt;- lmer(ks4stand ~ ks2stand + schoolfsm + (1|schoolID), data = valueadded, REML = F)
+
+summary(m5)</code></pre>
+<pre><code>## Linear mixed model fit by maximum likelihood  [&#39;lmerMod&#39;]
+## Formula: ks4stand ~ ks2stand + schoolfsm + (1 | schoolID)
+##    Data: valueadded
+## 
+##      AIC      BIC   logLik deviance df.resid 
+##  94182.1  94219.8 -47086.0  94172.1    14047 
+## 
+## Scaled residuals: 
+##     Min      1Q  Median      3Q     Max 
+## -4.8302 -0.5454  0.0223  0.5870  4.6542 
+## 
+## Random effects:
+##  Groups   Name        Variance Std.Dev.
+##  schoolID (Intercept)  8.832   2.972   
+##  Residual             44.203   6.649   
+## Number of obs: 14052, groups:  schoolID, 628
+## 
+## Fixed effects:
+##              Estimate Std. Error t value
+## (Intercept)  0.191653   0.196889   0.973
+## ks2stand     0.642585   0.006354 101.130
+## schoolfsm   -0.014478   0.007003  -2.067
+## 
+## Correlation of Fixed Effects:
+##           (Intr) ks2stn
+## ks2stand  -0.095       
+## schoolfsm -0.742  0.133</code></pre>
+<div id="question-2" class="section level3">
+<h3>Question:</h3>
+<p>4.1. What is the effect of the percentage of FSM eligible pupils on
+GCSE scores?</p>
+<p><br></p>
+<hr />
+</div>
+</div>
+<div id="task-5-school-specific-va-estimates" class="section level1">
+<h1>Task 5: School-specific VA estimates</h1>
+<p>Plotting the higher-level residuals can be helpful to identify groups
+that have higher or lower than average effect on the individual-level
+outcome. In the case of school performance, the residuals can be thought
+of as the effect uniquely attributable to the school on the progress of
+their pupils.</p>
+<p>To plot the residuals with this purpose, we can use a “caterpillar
+plot”.</p>
+<pre class="r"><code>u0 &lt;- ranef(m1, condVar = TRUE) # These are the residuals from model &quot;m1&quot;
+
+u0se &lt;- sqrt(attr(u0[[1]], &quot;postVar&quot;)[1,,]) # These are the standard errors of the residuals
+
+schoolid &lt;- as.numeric(rownames(u0[[1]])) # This is to create school identifiers</code></pre>
+<p>You will see there are three additional objects in your environment.
+To put them together in one dataset, we do the following:</p>
+<pre class="r"><code>school_resid &lt;- cbind(schoolid, u0[[1]], u0se)
+
+colnames(school_resid) &lt;- c(&quot;schoolid&quot;,&quot;u0&quot;,&quot;u0se&quot;)
+
+# Then we sort the residuals in ascending order:
+
+school_resid &lt;- school_resid[order(school_resid$u0), ] 
+
+# And we create a new column (variable) containing the ranks:
+
+school_resid &lt;- cbind(school_resid, c(1:dim(school_resid)[1]))
+
+colnames(school_resid)[4] &lt;- &quot;u0rank&quot; # This is to give a name to the new column containing the ranks</code></pre>
+<p>After all this, we end up with a new dataset
+<code>school_resid</code> containing the school value-added estimates.
+We can plot with <code>ggplot2</code> as such:</p>
+<pre class="r"><code>school_VA_plot &lt;- ggplot(school_resid, aes(x = u0rank, y = u0)) + 
+  geom_point(stat = &quot;identity&quot;) +
+  geom_errorbar(aes(ymin = u0 - 1.96*u0se, ymax = u0 + 1.96*u0se)) +
+  geom_hline(yintercept = 0,size = 1.2, alpha = 0.7,colour = &quot;#EF3B2C&quot;, linetype = &quot;twodash&quot;) +
+  xlab(&quot;Rank of residuals&quot;) +
+  ylab(&quot;School VA estimates&quot;) +
+  theme_bw()
+
+school_VA_plot</code></pre>
+<p><img src="Practical_2_files/figure-html/unnamed-chunk-9-1.png" width="672" /></p>
+<p>In the plot above, the red line at <code>y=0</code> represents the
+overall national average. Each school is represented by a point and a
+vertical segment, which represent the average school-specific effect and
+its 95% confidence interval (respectively). Schools on the left-hand
+side of the distribution that do not overlap with the national average
+line are said to be “significantly underperforming”; whereas those on
+the right-hand side that do not overlap the red line are “significantly
+overperforming”. All schools that do overlap are those that can be
+thought of as “performing as expected”.</p>
+<p><strong>NB:</strong> This is not the only tool to make such
+judgements about school performance; a comprehensive accountability
+system would involve also school inspections and qualitative
+judgements.</p>
+<hr />
+</div>
+<div id="task-6-school-predicted-lines" class="section level1">
+<h1>Task 6: School predicted lines</h1>
+<p>You could plot predictions for each school:</p>
+<pre class="r"><code>valueadded2 &lt;- filter(valueadded, !is.na(ks4stand) &amp; !is.na(ks2stand)) # this filter is necessary to avoid issues with missing values
+
+valueadded2$pred &lt;- fitted(m1)
+
+school_plot &lt;- ggplot(valueadded2, aes(x = ks2stand, y = pred, group = factor(schoolID))) + 
+  geom_smooth(method = &quot;lm&quot;, colour = &quot;black&quot;) +
+  xlab(&quot;Standardised KS2 score&quot;) +
+  ylab(&quot;Predicted KS4 score&quot;) +
+  theme_bw()
+
+school_plot</code></pre>
+<p><img src="Practical_2_files/figure-html/unnamed-chunk-10-1.png" width="672" /></p>
+<p>In the plot above, each line represents a school. As you can see,
+there is a lot of variability across schools. Lines are parallel because
+we haven’t allowed the effect of KS2 scores to vary across schools; this
+is a <code>random intercepts model</code>. You can compare this plot
+with the first one we did in practical 1, where the single-level
+regression line was clearly not enough to represent the extreme
+variability in scores. The MLM can account for that variability across
+schools and hence the multiple regression lines seen here are a much
+better representation of the observed data.</p>
+</div>
+
+<div id="rmd-source-code">LS0tDQp0aXRsZTogIkludHJvIHRvIE1MTTogUHJhY3RpY2FsIDIiDQphdXRob3I6IFBhdHJpY2lvIFRyb25jb3NvIGFuZCBBbmEgTW9yYWxlcy1Hw7NtZXoNCmRhdGU6ICJKdW5lIDIwMjMiDQpvdXRwdXQ6IA0KICBodG1sX2RvY3VtZW50Og0KICAgIGNvZGVfZG93bmxvYWQ6IHllcw0KICAgIGhpZ2hsaWdodGVyOiBudWxsDQogICAgdGhlbWU6IGNvc21vDQogICAgdG9jOiB5ZXMNCiAgICB0b2NfZGVwdGg6IDQNCiAgICB0b2NfZmxvYXQ6IHllcw0KICAgIGZvbnRzaXplOiAxMnB0DQotLS0NCg0KYGBge3Igc2V0dXAsIGluY2x1ZGU9RkFMU0V9DQprbml0cjo6b3B0c19jaHVuayRzZXQoZWNobyA9IFRSVUUpDQpsaWJyYXJ5KGhhdmVuKQ0KbGlicmFyeShsbWU0KQ0KbGlicmFyeShnZ3Bsb3QyKQ0KbGlicmFyeShkcGx5cikNCnlwZTwtcmVhZF9zYXYoImh0dHBzOi8vZ2l0aHViLmNvbS9BLW1vcmEvTUxNX3N1bW1lci1zY2hvb2wvcmF3L21haW4vZGF0YS9sc3lwZV8xNTAwMF9maW5hbF8yMDExXzA1XzA0LnNhdiIpDQp2YWx1ZWFkZGVkIDwtIHNlbGVjdCh5cGUsIHB1cGlsaWQsIHNjaG9vbElELCANCiAgICAgICAgICAgICAgICAgICAgIGtzMnN0YW5kLCBrczRzdGFuZCwgZ2VuZGVyLCANCiAgICAgICAgICAgICAgICAgICAgIGZzbSkNCmBgYA0KIyBSYW5kb20gaW50ZXJjZXB0cyBtb2RlbA0KDQpGb2xsb3dpbmcgdXAgZnJvbSB3aGF0IHdlIHdlcmUgZG9pbmcgaW4gcHJhY3RpY2FsIDEsIHdlJ2xsIGNvbnRpbnVlIGJ1aWxkaW5nIHVwIG91ciBtdWx0aWxldmVsIG1vZGVsIGZvciBzY2hvb2wgZWZmZWN0cy4NCg0KKioqDQoNCiMgVGFzayAxOiBWYWx1ZS1hZGRlZCBtb2RlbA0KDQpGaXQgYSBtb2RlbCB3aXRoICJwcmlvciBhdHRhaW5tZW50IiBhcyB0aGUgb25seSBjb3ZhcmlhdGUuIEFjY29yZGluZyB0byB0aGUgbGl0ZXJhdHVyZSB0aGlzIGlzIGEgInR5cGUgQUEiIHZhbHVlLWFkZGVkIG1vZGVsLiBBY2NvcmRpbmcgdG8gdGhlIERmRSwgdGhpcyBpcyBhIHNjaG9vbCB2YWx1ZS1hZGRlZCBtb2RlbCBvciAiVkEiDQoNCmBgYHtyLCB3YXJuaW5nPUYsIG1lc3NhZ2U9Rn0NCg0KbTEgPC1sbWVyKGtzNHN0YW5kIH4ga3Myc3RhbmQgKyAoMXxzY2hvb2xJRCksIGRhdGEgPSB2YWx1ZWFkZGVkLCBSRU1MID0gRikNCnN1bW1hcnkobTEpDQpgYGANCg0KIyMjIFF1ZXN0aW9uOg0KDQoxLjEuIFdoYXQgaXMgdGhlIGVmZmVjdCBvZiBieSBwcmlvciBhdHRhaW5tZW50Pw0KDQo8YnI+DQoNCioqKg0KDQojIFRhc2sgMjogQ29udGV4dHVhbGlzZWQgdmFsdWUtYWRkZWQgbW9kZWwNCg0KRml0IGEgbW9kZWwgd2l0aCBhbGwgdGhlIGF2YWlsYWJsZSBsZXZlbCAxIHZhcmlhYmxlcy4gSW4gdGhlIGxpdGVyYXR1cmUsIHRoaXMgbW9kZWwgaXMgY2FsbGVkICJ0eXBlIEFBIiB2YWx1ZS1hZGRlZC4gVGhlIERmRSB3b3VsZCB0aGlzIG1vZGVsIGEgImNvbnRleHR1YWxpc2VkIHZhbHVlLWFkZGVkIG1vZGVsIiBvciAiQ1ZBIi4NCg0KYGBge3IsIHdhcm5pbmc9RiwgbWVzc2FnZT1GfQ0KDQptMiA8LSBsbWVyKGtzNHN0YW5kIH4ga3Myc3RhbmQgKyBmYWN0b3IoZ2VuZGVyKSArIGZhY3Rvcihmc20pICsgKDF8c2Nob29sSUQpLCBkYXRhID0gdmFsdWVhZGRlZCwgUkVNTCA9IEYpDQpzdW1tYXJ5KG0yKQ0KYGBgDQoNCiMjIyBRdWVzdGlvbnMNCg0KMi4xLiBIb3cgbXVjaCBoYXZlIHRoZSB2YXJpYW5jZXMgKGF0IGJvdGggbGV2ZWxzKSByZWR1Y2VkPw0KDQoyLjIuIFdoYXQgZG9lcyB0aGlzIG1lYW4gZm9yIHRoZSBjb25jZXB0IG9mIHZhbHVlLWFkZGVkPw0KDQo8YnI+DQoNCioqKg0KDQojIFRhc2sgMzogRGlmZmVyZW50aWFsIHByb2dyZXNzIC0gSW50ZXJhY3Rpb24gZWZmZWN0cw0KDQojIyMgUXVlc3Rpb246DQoNCjMuMS4gRG8gbWFsZSBhbmQgZmVtYWxlIHB1cGlscyBoYXZlIGRpZmZlcmVudCBsZXZlbHMgb2YgcHJvZ3Jlc3M/DQoNCmBgYHtyLCB3YXJuaW5nPUYsIG1lc3NhZ2U9Rn0NCm0zIDwtIGxtZXIoa3M0c3RhbmQgfiBrczJzdGFuZCArIGtzMnN0YW5kKmZhY3RvcihnZW5kZXIpICsgZmFjdG9yKGdlbmRlcikrDQogICAgICAgICAgIGZhY3Rvcihmc20pICsgKDF8c2Nob29sSUQpLCBkYXRhID0gdmFsdWVhZGRlZCwgUkVNTCA9IEYpDQoNCnN1bW1hcnkobTMpDQpgYGANCg0KMy4yLiBEbyBGU00gZWxpZ2libGUgcHVwaWxzIG1ha2UgbW9yZSBvciBsZXNzIHByb2dyZXNzPw0KDQpgYGB7ciwgd2FybmluZz1GLCBtZXNzYWdlPUZ9DQptNCA8LSBsbWVyKGtzNHN0YW5kIH4ga3Myc3RhbmQgKyBrczJzdGFuZCpmYWN0b3IoZnNtKSArIGZhY3RvcihnZW5kZXIpKw0KICAgICAgICAgICBmYWN0b3IoZnNtKSArICgxfHNjaG9vbElEKSwgZGF0YSA9IHZhbHVlYWRkZWQsIFJFTUwgPSBGKQ0KDQpzdW1tYXJ5KG00KQ0KYGBgDQoNCjxicj4NCg0KKioqDQoNCiMgVGFzayA0OiBTY2hvb2wtbGV2ZWwgdmFyaWFibGVzDQoNCk9uZSBvZiB0aGUgc3RyZW5ndGhzIG9mIE1MTSBpcyB0aGF0IHdlIGNhbiBldmFsdWF0ZSB0aGUgZWZmZWN0IG9mIG11bHRpcGxlIHZhcmlhYmxlcyBhdCBkaWZmZXJlbnQgbGV2ZWxzIG9uIHRoZSBvdXRjb21lIG9mIGludGVyZXN0LiBBZGRpbmcgaGlnaGVyLWxldmVsIHZhcmlhYmxlcyBpcyBkb25lIGluIHRoZSBzYW1lIHdheSBhcyBhbnkgb3RoZXIgaW5kaXZpZHVhbC1sZXZlbCB2YXJpYWJsZS4NCg0KV2UgY2FuIGVhc2lseSBjcmVhdGUgYSBuZXcgc2Nob29sLWxldmVsIHZhcmlhYmxlIGZyb20gdGhlIGRhdGFzZXQgd2UgaGF2ZSBpZiB3ZSBhZ2dyZWdhdGUgcHVwaWwtbGV2ZWwgZGF0YS4gVGhlIGNvZGUgYmVsb3cgdXNlcyB0aGUgZnVuY3Rpb24gYG11dGF0ZWAgb2YgdGhlIGBkcGx5cmAgcGFja2FnZSB0byBjcmVhdGUgYSBuZXcgdmFyaWFibGUgdGhhdCByZXByZXNlbnRzIHRoZSBwZXJjZW50YWdlIG9mIHB1cGlscyBlbGlnaWJsZSBmb3IgZnJlZSBzY2hvb2wgbWVhbHMgaW4gZWFjaCBzY2hvb2w6DQoNCmBgYHtyLCB3YXJuaW5nPUYsIG1lc3NhZ2U9Rn0NCnZhbHVlYWRkZWQgPC0gdmFsdWVhZGRlZCAlPiUNCiAgZ3JvdXBfYnkoc2Nob29sSUQpICU+JQ0KICBtdXRhdGUoc2Nob29sZnNtID0gbWVhbihmc20sIG5hLnJtID0gVCkqMTAwKQ0KYGBgDQoNCllvdSBjYW4gaW5zcGVjdCB0aGUgcmVzdWx0cyBieSBjbGlja2luZyBvbiB0aGUgb2JqZWN0IGB2YWx1ZWFkZGVkYCB0aGF0IGlzIGluIHlvdXIgRW52aXJvbm1lbnQgdGFiLg0KDQpBZnRlciB0aGF0LCB3ZSdyZSByZWFkeSB0byBmaXQgdGhlIG1vZGVsIHdpdGggYHNjaG9vbGZzbWAuDQoNCmBgYHtyLCB3YXJuaW5nPUYsIG1lc3NhZ2U9Rn0NCm01IDwtIGxtZXIoa3M0c3RhbmQgfiBrczJzdGFuZCArIHNjaG9vbGZzbSArICgxfHNjaG9vbElEKSwgZGF0YSA9IHZhbHVlYWRkZWQsIFJFTUwgPSBGKQ0KDQpzdW1tYXJ5KG01KQ0KYGBgDQoNCiMjIyBRdWVzdGlvbjoNCg0KNC4xLiBXaGF0IGlzIHRoZSBlZmZlY3Qgb2YgdGhlIHBlcmNlbnRhZ2Ugb2YgRlNNIGVsaWdpYmxlIHB1cGlscyBvbiBHQ1NFIHNjb3Jlcz8NCg0KPGJyPg0KDQoqKioNCg0KIyBUYXNrIDU6IFNjaG9vbC1zcGVjaWZpYyBWQSBlc3RpbWF0ZXMNCg0KUGxvdHRpbmcgdGhlIGhpZ2hlci1sZXZlbCByZXNpZHVhbHMgY2FuIGJlIGhlbHBmdWwgdG8gaWRlbnRpZnkgZ3JvdXBzIHRoYXQgaGF2ZSBoaWdoZXIgb3IgbG93ZXIgdGhhbiBhdmVyYWdlIGVmZmVjdCBvbiB0aGUgaW5kaXZpZHVhbC1sZXZlbCBvdXRjb21lLiBJbiB0aGUgY2FzZSBvZiBzY2hvb2wgcGVyZm9ybWFuY2UsIHRoZSByZXNpZHVhbHMgY2FuIGJlIHRob3VnaHQgb2YgYXMgdGhlIGVmZmVjdCB1bmlxdWVseSBhdHRyaWJ1dGFibGUgdG8gdGhlIHNjaG9vbCBvbiB0aGUgcHJvZ3Jlc3Mgb2YgdGhlaXIgcHVwaWxzLg0KDQpUbyBwbG90IHRoZSByZXNpZHVhbHMgd2l0aCB0aGlzIHB1cnBvc2UsIHdlIGNhbiB1c2UgYSAiY2F0ZXJwaWxsYXIgcGxvdCIuDQoNCg0KYGBge3IsIHdhcm5pbmc9RiwgbWVzc2FnZT1GfQ0KDQp1MCA8LSByYW5lZihtMSwgY29uZFZhciA9IFRSVUUpICMgVGhlc2UgYXJlIHRoZSByZXNpZHVhbHMgZnJvbSBtb2RlbCAibTEiDQoNCnUwc2UgPC0gc3FydChhdHRyKHUwW1sxXV0sICJwb3N0VmFyIilbMSwsXSkgIyBUaGVzZSBhcmUgdGhlIHN0YW5kYXJkIGVycm9ycyBvZiB0aGUgcmVzaWR1YWxzDQoNCnNjaG9vbGlkIDwtIGFzLm51bWVyaWMocm93bmFtZXModTBbWzFdXSkpICMgVGhpcyBpcyB0byBjcmVhdGUgc2Nob29sIGlkZW50aWZpZXJzDQpgYGANCg0KWW91IHdpbGwgc2VlIHRoZXJlIGFyZSB0aHJlZSBhZGRpdGlvbmFsIG9iamVjdHMgaW4geW91ciBlbnZpcm9ubWVudC4gVG8gcHV0IHRoZW0gdG9nZXRoZXIgaW4gb25lIGRhdGFzZXQsIHdlIGRvIHRoZSBmb2xsb3dpbmc6DQoNCmBgYHtyLCB3YXJuaW5nPUYsIG1lc3NhZ2U9Rn0NCg0Kc2Nob29sX3Jlc2lkIDwtIGNiaW5kKHNjaG9vbGlkLCB1MFtbMV1dLCB1MHNlKQ0KDQpjb2xuYW1lcyhzY2hvb2xfcmVzaWQpIDwtIGMoInNjaG9vbGlkIiwidTAiLCJ1MHNlIikNCg0KIyBUaGVuIHdlIHNvcnQgdGhlIHJlc2lkdWFscyBpbiBhc2NlbmRpbmcgb3JkZXI6DQoNCnNjaG9vbF9yZXNpZCA8LSBzY2hvb2xfcmVzaWRbb3JkZXIoc2Nob29sX3Jlc2lkJHUwKSwgXSANCg0KIyBBbmQgd2UgY3JlYXRlIGEgbmV3IGNvbHVtbiAodmFyaWFibGUpIGNvbnRhaW5pbmcgdGhlIHJhbmtzOg0KDQpzY2hvb2xfcmVzaWQgPC0gY2JpbmQoc2Nob29sX3Jlc2lkLCBjKDE6ZGltKHNjaG9vbF9yZXNpZClbMV0pKQ0KDQpjb2xuYW1lcyhzY2hvb2xfcmVzaWQpWzRdIDwtICJ1MHJhbmsiICMgVGhpcyBpcyB0byBnaXZlIGEgbmFtZSB0byB0aGUgbmV3IGNvbHVtbiBjb250YWluaW5nIHRoZSByYW5rcw0KYGBgDQoNCkFmdGVyIGFsbCB0aGlzLCB3ZSBlbmQgdXAgd2l0aCBhIG5ldyBkYXRhc2V0IGBzY2hvb2xfcmVzaWRgIGNvbnRhaW5pbmcgdGhlIHNjaG9vbCB2YWx1ZS1hZGRlZCBlc3RpbWF0ZXMuIFdlIGNhbiBwbG90IHdpdGggYGdncGxvdDJgIGFzIHN1Y2g6DQoNCmBgYHtyLCB3YXJuaW5nPUYsIG1lc3NhZ2U9Rn0NCnNjaG9vbF9WQV9wbG90IDwtIGdncGxvdChzY2hvb2xfcmVzaWQsIGFlcyh4ID0gdTByYW5rLCB5ID0gdTApKSArIA0KICBnZW9tX3BvaW50KHN0YXQgPSAiaWRlbnRpdHkiKSArDQogIGdlb21fZXJyb3JiYXIoYWVzKHltaW4gPSB1MCAtIDEuOTYqdTBzZSwgeW1heCA9IHUwICsgMS45Nip1MHNlKSkgKw0KICBnZW9tX2hsaW5lKHlpbnRlcmNlcHQgPSAwLHNpemUgPSAxLjIsIGFscGhhID0gMC43LGNvbG91ciA9ICIjRUYzQjJDIiwgbGluZXR5cGUgPSAidHdvZGFzaCIpICsNCiAgeGxhYigiUmFuayBvZiByZXNpZHVhbHMiKSArDQogIHlsYWIoIlNjaG9vbCBWQSBlc3RpbWF0ZXMiKSArDQogIHRoZW1lX2J3KCkNCg0Kc2Nob29sX1ZBX3Bsb3QNCg0KYGBgDQoNCkluIHRoZSBwbG90IGFib3ZlLCB0aGUgcmVkIGxpbmUgYXQgYHk9MGAgcmVwcmVzZW50cyB0aGUgb3ZlcmFsbCBuYXRpb25hbCBhdmVyYWdlLiBFYWNoIHNjaG9vbCBpcyByZXByZXNlbnRlZCBieSBhIHBvaW50IGFuZCBhIHZlcnRpY2FsIHNlZ21lbnQsIHdoaWNoIHJlcHJlc2VudCB0aGUgYXZlcmFnZSBzY2hvb2wtc3BlY2lmaWMgZWZmZWN0IGFuZCBpdHMgOTUlIGNvbmZpZGVuY2UgaW50ZXJ2YWwgKHJlc3BlY3RpdmVseSkuIFNjaG9vbHMgb24gdGhlIGxlZnQtaGFuZCBzaWRlIG9mIHRoZSBkaXN0cmlidXRpb24gdGhhdCBkbyBub3Qgb3ZlcmxhcCB3aXRoIHRoZSBuYXRpb25hbCBhdmVyYWdlIGxpbmUgYXJlIHNhaWQgdG8gYmUgInNpZ25pZmljYW50bHkgdW5kZXJwZXJmb3JtaW5nIjsgd2hlcmVhcyB0aG9zZSBvbiB0aGUgcmlnaHQtaGFuZCBzaWRlIHRoYXQgZG8gbm90IG92ZXJsYXAgdGhlIHJlZCBsaW5lIGFyZSAic2lnbmlmaWNhbnRseSBvdmVycGVyZm9ybWluZyIuIEFsbCBzY2hvb2xzIHRoYXQgZG8gb3ZlcmxhcCBhcmUgdGhvc2UgdGhhdCBjYW4gYmUgdGhvdWdodCBvZiBhcyAicGVyZm9ybWluZyBhcyBleHBlY3RlZCIuIA0KDQoqKk5COioqIFRoaXMgaXMgbm90IHRoZSBvbmx5IHRvb2wgdG8gbWFrZSBzdWNoIGp1ZGdlbWVudHMgYWJvdXQgc2Nob29sIHBlcmZvcm1hbmNlOyBhIGNvbXByZWhlbnNpdmUgYWNjb3VudGFiaWxpdHkgc3lzdGVtIHdvdWxkIGludm9sdmUgYWxzbyBzY2hvb2wgaW5zcGVjdGlvbnMgYW5kIHF1YWxpdGF0aXZlIGp1ZGdlbWVudHMuDQoNCioqKg0KDQojIFRhc2sgNjogU2Nob29sIHByZWRpY3RlZCBsaW5lcw0KDQpZb3UgY291bGQgcGxvdCBwcmVkaWN0aW9ucyBmb3IgZWFjaCBzY2hvb2w6DQpgYGB7ciwgd2FybmluZz1GLCBtZXNzYWdlPUZ9DQoNCnZhbHVlYWRkZWQyIDwtIGZpbHRlcih2YWx1ZWFkZGVkLCAhaXMubmEoa3M0c3RhbmQpICYgIWlzLm5hKGtzMnN0YW5kKSkgIyB0aGlzIGZpbHRlciBpcyBuZWNlc3NhcnkgdG8gYXZvaWQgaXNzdWVzIHdpdGggbWlzc2luZyB2YWx1ZXMNCg0KdmFsdWVhZGRlZDIkcHJlZCA8LSBmaXR0ZWQobTEpDQoNCnNjaG9vbF9wbG90IDwtIGdncGxvdCh2YWx1ZWFkZGVkMiwgYWVzKHggPSBrczJzdGFuZCwgeSA9IHByZWQsIGdyb3VwID0gZmFjdG9yKHNjaG9vbElEKSkpICsgDQogIGdlb21fc21vb3RoKG1ldGhvZCA9ICJsbSIsIGNvbG91ciA9ICJibGFjayIpICsNCiAgeGxhYigiU3RhbmRhcmRpc2VkIEtTMiBzY29yZSIpICsNCiAgeWxhYigiUHJlZGljdGVkIEtTNCBzY29yZSIpICsNCiAgdGhlbWVfYncoKQ0KDQpzY2hvb2xfcGxvdA0KDQpgYGANCg0KSW4gdGhlIHBsb3QgYWJvdmUsIGVhY2ggbGluZSByZXByZXNlbnRzIGEgc2Nob29sLiBBcyB5b3UgY2FuIHNlZSwgdGhlcmUgaXMgYSBsb3Qgb2YgdmFyaWFiaWxpdHkgYWNyb3NzIHNjaG9vbHMuIA0KTGluZXMgYXJlIHBhcmFsbGVsIGJlY2F1c2Ugd2UgaGF2ZW4ndCBhbGxvd2VkIHRoZSBlZmZlY3Qgb2YgS1MyIHNjb3JlcyB0byB2YXJ5IGFjcm9zcyBzY2hvb2xzOyB0aGlzIGlzIGEgYHJhbmRvbSBpbnRlcmNlcHRzIG1vZGVsYC4gWW91IGNhbiBjb21wYXJlIHRoaXMgcGxvdCB3aXRoIHRoZSBmaXJzdCBvbmUgd2UgZGlkIGluIHByYWN0aWNhbCAxLCB3aGVyZSB0aGUgc2luZ2xlLWxldmVsIHJlZ3Jlc3Npb24gbGluZSB3YXMgY2xlYXJseSBub3QgZW5vdWdoIHRvIHJlcHJlc2VudCB0aGUgZXh0cmVtZSB2YXJpYWJpbGl0eSBpbiBzY29yZXMuIFRoZSBNTE0gY2FuIGFjY291bnQgZm9yIHRoYXQgdmFyaWFiaWxpdHkgYWNyb3NzIHNjaG9vbHMgYW5kIGhlbmNlIHRoZSBtdWx0aXBsZSByZWdyZXNzaW9uIGxpbmVzIHNlZW4gaGVyZSBhcmUgYSBtdWNoIGJldHRlciByZXByZXNlbnRhdGlvbiBvZiB0aGUgb2JzZXJ2ZWQgZGF0YS4=</div>
+
+
+</div>
+</div>
+
+</div>
+
+<script>
+
+// add bootstrap table styles to pandoc tables
+function bootstrapStylePandocTables() {
+  $('tr.odd').parent('tbody').parent('table').addClass('table table-condensed');
+}
+$(document).ready(function () {
+  bootstrapStylePandocTables();
+});
+
+
+</script>
+
+<!-- tabsets -->
+
+<script>
+$(document).ready(function () {
+  window.buildTabsets("TOC");
+});
+
+$(document).ready(function () {
+  $('.tabset-dropdown > .nav-tabs > li').click(function () {
+    $(this).parent().toggleClass('nav-tabs-open');
+  });
+});
+</script>
+
+<!-- code folding -->
+<script>
+$(document).ready(function () {
+  window.initializeSourceEmbed("Practical_2.Rmd");
+});
+</script>
+
+<script>
+$(document).ready(function ()  {
+
+    // temporarily add toc-ignore selector to headers for the consistency with Pandoc
+    $('.unlisted.unnumbered').addClass('toc-ignore')
+
+    // move toc-ignore selectors from section div to header
+    $('div.section.toc-ignore')
+        .removeClass('toc-ignore')
+        .children('h1,h2,h3,h4,h5').addClass('toc-ignore');
+
+    // establish options
+    var options = {
+      selectors: "h1,h2,h3,h4",
+      theme: "bootstrap3",
+      context: '.toc-content',
+      hashGenerator: function (text) {
+        return text.replace(/[.\\/?&!#<>]/g, '').replace(/\s/g, '_');
+      },
+      ignoreSelector: ".toc-ignore",
+      scrollTo: 0
+    };
+    options.showAndHide = true;
+    options.smoothScroll = true;
+
+    // tocify
+    var toc = $("#TOC").tocify(options).data("toc-tocify");
+});
+</script>
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>

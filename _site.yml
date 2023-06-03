@@ -1,0 +1,17 @@
+name: "Multilevel Modelling"
+navbar:
+  title: "Multilevel Modelling"
+  left:
+    - text: "Home"
+      href: index.html
+    - text: "Practical 1"
+      href: Practical_1.html
+    - text: "Practical 2"
+      href: Practical_2.html
+    - text: "Practical 3"
+      href: Practical_3.html
+    - text: "Practical 4"
+      href: Practical_4.html
+    - text: "Solutions"
+      href: Solutions.html
+output_dir: "docs"

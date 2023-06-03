@@ -1,0 +1,22 @@
+---
+title: "Solutions"
+output: 
+  html_document:
+    theme: cosmo
+    toc: yes
+    toc_float: yes
+    fontsize: 12pt
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(message=FALSE,warning=FALSE, cache=TRUE)
+```
+
+Here you can find our proposed answers to the questions posed in the practicals. 
+
+- Practical 1: <a href="https://rpubs.com/patroncos/mlm_2023_practical1_solutions" target="_blank">Solutions</a>
+- Practical 2: <a href="https://rpubs.com/patroncos/mlm_2023_practical2_solutions" target="_blank">Solutions</a>
+- Practical 3: <a href="https://rpubs.com/patroncos/mlm_2023_practical3_solutions" target="_blank">Solutions</a>
+- Practical 4: <a href="https://rpubs.com/patroncos/mlm_2023_practical4_solutions" target="_blank">Solutions</a>
+
+ 

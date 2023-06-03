@@ -1,0 +1,334 @@
+---
+title: "Intro to MLM: Practical 3"
+author: Ana Morales-Gómez and Patricio Troncoso 
+date: "June 2023"
+output: 
+  html_document:
+    code_download: yes
+    highlighter: null
+    theme: cosmo
+    toc: yes
+    toc_depth: 4
+    toc_float: yes
+    fontsize: 12pt
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+For this practical, we will use data from a sample of the Teaching dataset of the Health Survey for England (2003-2005), which is
+available [**here**](https://beta.ukdataservice.ac.uk/datacatalogue/studies/study?id=6765).
+
+We will be fitting a series of binary logistic multilevel models for the probability of being overweight or obese.
+
+The traditional measure used to determine whether an adult is overweight is the Body-Mass Index (BMI).
+
+For an adult to be considered overweight, their BMI must be between 25 and 30. Meanwhile values over 30 are considered as "obese".
+
+<br>
+
+***
+
+# Typical workflow setup and data preparation
+
+## 1.1. Define a working directory
+
+You can use any directory in your computer. As in the example below:
+
+```{r, eval=F}
+setwd("C:/myfolder")
+```
+
+Remember to download the data to the folder you will define as working directory, as this makes matters easier.
+
+## 1.2. Load packages
+
+You can always load packages later on, but it is a good practice to load packages at the beginning of the session on the top of your script or R markdown file.
+
+In this practical, we will use the packages `haven`, `lme4` and `ggplot2`. Remember that if you haven't installed them before, you need to do so before you call the `library` function:
+
+```{}
+install.packages("tidyverse")
+install.packages("haven")
+install.packages("lme4")
+install.packages("ggplot2")
+install.packages("dplyr")
+install.packages("broom.mixed")
+```
+
+Then you load them as such:
+
+```{r, warning=F, message=F}
+library(haven)
+library(lme4)
+library(ggplot2)
+library(dplyr)
+library(tidyverse)
+library(broom.mixed)
+```
+
+## 1.3. Read in data 
+
+You can download the data from  the [**UKDS website**](https://beta.ukdataservice.ac.uk/datacatalogue/studies/study?id=6765). There are four files in different formats. We will be using the Stata dataset named: "hse_data_for_workshop.dta".
+
+To read this dataset into R, we need to use the package `haven`:
+
+
+```{r, warning=F, message=F}
+hse <- read_dta("https://github.com/A-mora/MLM_summer-school/raw/main/data/hse_data_for_workshop.dta")
+```
+
+<br>
+
+***
+
+## Select variables to use
+
+The dataset has many different variables, but we're not going to be using all of them, so for easier work, we will select the following: `year`, `pserial`, `area`, `bmival`, `sex`, `age` and `ethnic`.
+
+`year` is the year where the measures were taken
+
+`pserial` is the anonymised person identifier
+
+`area` is the anonymised postcode of the person
+
+`bmival` is the valid measure of BMI
+
+`sex` coded 0 for Men and 1 for Women
+
+`age` from 0 to 99
+
+`ethnic` coded 1 for White; 
+               2 for Mixed; 
+               3 for Asian or Asian British; 
+               4 for Black or Black British and 
+               5 for Chinese or any other group
+
+For a detailed description of these variables, have a look in the documentation downloaded alongside with the data. 
+**Spoiler alert:** You will also find a complete set of materials for a workshop on MLM.
+
+To select variables, we (unsurprisingly) need to use the function `select` of the `dplyr` package:
+
+```{r, warning=F, message=F}
+
+hse2 <- select(hse, year, pserial, area, bmival, sex, age, ethnic, bmival) 
+
+```
+
+<br>
+
+***
+# Preliminary tasks
+
+We need to dichotomise our dependent variable `bmival`. As we mentioned before, the categories "overweight" and "obese" are for those with a BMI over 25 and 30, respectively, so we need to do the following to our continuous BMI measure:
+
+```{r, warning=F, message=F}
+hse2$bmi_bin <- ifelse(hse2$bmival >= 25, 1, 0)
+```
+
+To check this is done correctly, you can run a simple frequency table:
+
+```{r, warning=F, message=F}
+table(hse2$bmi_bin)
+```
+
+If there are more than two values there, then something must have gone wrong.
+
+Also, given that the BMI in children is done differently, we will remove all under-18 individuals. We do this by typing:
+
+```{r, warning=F, message=F}
+hse2 <- hse2 %>% filter(age>18)
+```
+
+# Task 1: Fit an empty model
+
+We will start by fitting an empty multilevel model for the propensity of being overweight in people nested in areas.
+
+```{r, warning=F, message=F}
+empty <- glmer(bmi_bin ~ 1 + (1|area), data = hse2, family = binomial("logit"))
+
+summary(empty)
+```
+
+
+<br>
+
+### Questions:
+
+1.1 What is the overall probability of being overweight?
+
+Remember this formula:
+
+$$logit(p_i)=\log\left(\frac{p_{i}}{1-p_{i}}\right)$$
+To get the odds from the estimated coefficients, you use the exponent function:
+
+$$exp(\beta)=odds$$
+
+Then, to convert to probability, you can do this:
+
+$$p = \frac{odds}{1 + odds}$$
+```{r, warning=F, message=F}
+
+odds <- exp(empty@beta) # this is to retrieve the intercept from the model
+
+prob <- odds/(1 + odds) # to estimate the overall probability
+
+prob # to print the result to the screen
+```
+
+
+1.2 What is the VPC for this model?
+
+$$VPC = \frac{\sigma_u^2}{\sigma_u^2 + \sigma_e^2*}$$
+where $\sigma_e^2*= \frac{\pi^2}{3} \approx 3.29$
+
+```{r, warning=F, message=F}
+lev2var <- as.numeric(VarCorr(empty)) # this is to retrieve the level 2 variance from the model
+
+(lev2var)/(lev2var+3.29) # VPC
+```
+
+<br>
+
+***
+
+# Task 2: Is the MLM better than a single-level model?
+
+To assess the statistical significance of the MLM, we need to compare it to a single-level model. To fit a single-level model, we type:
+
+```{r, warning=F, message=F}
+
+single <- glm(bmi_bin ~ 1 , data = hse2, family = binomial("logit"))
+
+summary(single)
+
+```
+
+These results are not very interesting in themselves, so we move on extract the loglikelihood and compare to the MLM.
+
+```{r, warning=F, message=F}
+
+L1 <- as.numeric(logLik(single)) # store this as numerical to re-use
+L2 <- as.numeric(logLik(empty))
+
+(D <- 2*(L2-L1)) # this is the deviance, we put it within brackets to print it immediately
+
+pchisq(q=D, df=1, lower.tail=F) # To find the p-value
+
+```
+
+### Question
+
+2.1. Is the addition of the area level statistically significant?
+
+2.2. What does this mean in practice?
+
+***
+
+# Task 3: Random intercepts model
+
+Just like in the case of normally-distributed responses, we can fit a `random intercepts` model by adding explanatory variables.
+
+We want to find out whether there any differences between males and females on the probability of being overweight.
+
+```{r, warning=T, message=F}
+rand_int <- glmer(bmi_bin ~ factor(sex) + (1|area), data = hse2, family = binomial("logit"))
+
+summary(rand_int)
+```
+
+We can also get a more "human-readable" version of the table of coefficients by using the package `broom.mixed`:
+
+```{r, warning=F, message=F}
+(m1 <- tidy(rand_int, effects = "fixed",
+          conf.int=TRUE, 
+          exponentiate=FALSE))
+```
+
+You can plot these for easier inspection:
+
+```{r}
+(m1_plot <- 
+    ggplot(m1, 
+           mapping = aes(x= estimate,
+                         y = term, 
+                         xmin = conf.low, 
+                         xmax = conf.high)) +
+    geom_vline(xintercept = 0, color = "tomato", size =1) +
+    geom_pointrange() +
+    theme_classic())
+```
+
+If you want to obtain the odds ratios, you can change the option `exponentiate` to `TRUE`.
+
+```{r, warning=F, message=F}
+(m1_odds <- tidy(rand_int, effects = "fixed",
+          conf.int=TRUE, 
+          exponentiate=TRUE))
+```
+
+Unsurprisingly, you can plot the odds for easier inspection:
+
+```{r}
+(m1_odds_plot <- 
+    ggplot(m1_odds, 
+           mapping = aes(x= estimate,
+                         y = term, 
+                         xmin = conf.low, 
+                         xmax = conf.high)) +
+    geom_vline(xintercept = 1, color = "tomato", size =1) +
+    geom_pointrange() +
+    theme_classic())
+```
+
+### Question:
+
+3.1. What is the effect of sex on being overweight?
+
+3.2. What is the probability of a female being overweight in this sample?
+
+***
+
+# Task 4: Area-specific estimates
+
+Just like in task 5 of practical 2, we can retrieve the residuals from the `random intercepts` and plot them to find out which areas have more or less than average people who are overweight.
+
+This is what is sometimes called in the literature a "Caterpillar plot".
+
+```{r, warning=F, message=F}
+m2 <- tidy(rand_int, effects = "ran_vals",
+          conf.int=TRUE,
+          exponentiate=FALSE)
+
+(RE <- m2 %>%
+    mutate(level = fct_reorder(level, estimate)) %>%
+    ggplot( mapping = aes(x= estimate,
+                         y = level, 
+                         xmin = conf.low, 
+                         xmax = conf.high)) +
+    geom_vline(xintercept = 0, color = "tomato", size =1) +
+    coord_flip() +
+    labs(x = "logit",
+         y = "Areas") +
+    geom_pointrange() +
+    theme_classic())
+
+```
+
+### Question:
+
+4.1. Are there any areas that are significantly above or below average?
+
+***
+
+# Additional tasks
+
+You can borrow from practical 2 and repeat some of the tasks there, such as:
+
+- adding more explanatory variables 
+
+- adding interaction effects
+
+- plot predictions.

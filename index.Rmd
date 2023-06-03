@@ -1,0 +1,57 @@
+---
+title: "MLM Summer School 2023"
+output: 
+  html_document:
+    theme: cosmo
+---
+
+<style type="text/css">
+.title {
+  display: none;
+}
+
+#getting-started img {
+  margin-right: 10px;
+}
+
+</style>
+
+<div class="row" style="padding-top: 30px;">
+<div class="col-sm-6">
+
+# **Welcome to the world of multilevel models**
+
+On this website you will find all the materials for the Multilevel Modelling course of the SGSSS Summer School 2023.
+
+This six-hour workshop will give you an introduction to Multilevel Modelling through a mixture of traditional lectures and hands-on sessions, where we put the concepts into practice.
+
+</br>
+
+## Outline
+
+- A brief overview of linear regression
+- Multilevel data structures and examples
+- Variance components and group-specific estimates
+- Accounting for individual and group characteristics: fixed effects
+- Multilevel modelling for binary responses
+- Differential processes between groups: random effects
+
+</br>
+
+## Materials
+
+- Here you can see the <a href="https://a-mora.github.io/summer_school_mlm/#1" target="_blank">Slides</a>  
+- To see the practicals, you can navigate through the tabs at the top.
+
+</br>
+Site developed by Morales-Gomez & Troncoso
+</div>
+<div class="col-sm-6">
+
+
+<img src="https://raw.githubusercontent.com/A-mora/summer_school_mlm/main/images/multilevelAI.jpeg" align="center"/>
+
+
+
+</div>
+

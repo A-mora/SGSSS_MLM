@@ -1,0 +1,203 @@
+---
+title: "Intro to MLM: Practical 2"
+author: Patricio Troncoso and Ana Morales-Gómez
+date: "June 2023"
+output: 
+  html_document:
+    code_download: yes
+    highlighter: null
+    theme: cosmo
+    toc: yes
+    toc_depth: 4
+    toc_float: yes
+    fontsize: 12pt
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(haven)
+library(lme4)
+library(ggplot2)
+library(dplyr)
+ype<-read_sav("https://github.com/A-mora/MLM_summer-school/raw/main/data/lsype_15000_final_2011_05_04.sav")
+valueadded <- select(ype, pupilid, schoolID, 
+                     ks2stand, ks4stand, gender, 
+                     fsm)
+```
+# Random intercepts model
+
+Following up from what we were doing in practical 1, we'll continue building up our multilevel model for school effects.
+
+***
+
+# Task 1: Value-added model
+
+Fit a model with "prior attainment" as the only covariate. According to the literature this is a "type AA" value-added model. According to the DfE, this is a school value-added model or "VA"
+
+```{r, warning=F, message=F}
+
+m1 <-lmer(ks4stand ~ ks2stand + (1|schoolID), data = valueadded, REML = F)
+summary(m1)
+```
+
+### Question:
+
+1.1. What is the effect of by prior attainment?
+
+<br>
+
+***
+
+# Task 2: Contextualised value-added model
+
+Fit a model with all the available level 1 variables. In the literature, this model is called "type AA" value-added. The DfE would this model a "contextualised value-added model" or "CVA".
+
+```{r, warning=F, message=F}
+
+m2 <- lmer(ks4stand ~ ks2stand + factor(gender) + factor(fsm) + (1|schoolID), data = valueadded, REML = F)
+summary(m2)
+```
+
+### Questions
+
+2.1. How much have the variances (at both levels) reduced?
+
+2.2. What does this mean for the concept of value-added?
+
+<br>
+
+***
+
+# Task 3: Differential progress - Interaction effects
+
+### Question:
+
+3.1. Do male and female pupils have different levels of progress?
+
+```{r, warning=F, message=F}
+m3 <- lmer(ks4stand ~ ks2stand + ks2stand*factor(gender) + factor(gender)+
+           factor(fsm) + (1|schoolID), data = valueadded, REML = F)
+
+summary(m3)
+```
+
+3.2. Do FSM eligible pupils make more or less progress?
+
+```{r, warning=F, message=F}
+m4 <- lmer(ks4stand ~ ks2stand + ks2stand*factor(fsm) + factor(gender)+
+           factor(fsm) + (1|schoolID), data = valueadded, REML = F)
+
+summary(m4)
+```
+
+<br>
+
+***
+
+# Task 4: School-level variables
+
+One of the strengths of MLM is that we can evaluate the effect of multiple variables at different levels on the outcome of interest. Adding higher-level variables is done in the same way as any other individual-level variable.
+
+We can easily create a new school-level variable from the dataset we have if we aggregate pupil-level data. The code below uses the function `mutate` of the `dplyr` package to create a new variable that represents the percentage of pupils eligible for free school meals in each school:
+
+```{r, warning=F, message=F}
+valueadded <- valueadded %>%
+  group_by(schoolID) %>%
+  mutate(schoolfsm = mean(fsm, na.rm = T)*100)
+```
+
+You can inspect the results by clicking on the object `valueadded` that is in your Environment tab.
+
+After that, we're ready to fit the model with `schoolfsm`.
+
+```{r, warning=F, message=F}
+m5 <- lmer(ks4stand ~ ks2stand + schoolfsm + (1|schoolID), data = valueadded, REML = F)
+
+summary(m5)
+```
+
+### Question:
+
+4.1. What is the effect of the percentage of FSM eligible pupils on GCSE scores?
+
+<br>
+
+***
+
+# Task 5: School-specific VA estimates
+
+Plotting the higher-level residuals can be helpful to identify groups that have higher or lower than average effect on the individual-level outcome. In the case of school performance, the residuals can be thought of as the effect uniquely attributable to the school on the progress of their pupils.
+
+To plot the residuals with this purpose, we can use a "caterpillar plot".
+
+
+```{r, warning=F, message=F}
+
+u0 <- ranef(m1, condVar = TRUE) # These are the residuals from model "m1"
+
+u0se <- sqrt(attr(u0[[1]], "postVar")[1,,]) # These are the standard errors of the residuals
+
+schoolid <- as.numeric(rownames(u0[[1]])) # This is to create school identifiers
+```
+
+You will see there are three additional objects in your environment. To put them together in one dataset, we do the following:
+
+```{r, warning=F, message=F}
+
+school_resid <- cbind(schoolid, u0[[1]], u0se)
+
+colnames(school_resid) <- c("schoolid","u0","u0se")
+
+# Then we sort the residuals in ascending order:
+
+school_resid <- school_resid[order(school_resid$u0), ] 
+
+# And we create a new column (variable) containing the ranks:
+
+school_resid <- cbind(school_resid, c(1:dim(school_resid)[1]))
+
+colnames(school_resid)[4] <- "u0rank" # This is to give a name to the new column containing the ranks
+```
+
+After all this, we end up with a new dataset `school_resid` containing the school value-added estimates. We can plot with `ggplot2` as such:
+
+```{r, warning=F, message=F}
+school_VA_plot <- ggplot(school_resid, aes(x = u0rank, y = u0)) + 
+  geom_point(stat = "identity") +
+  geom_errorbar(aes(ymin = u0 - 1.96*u0se, ymax = u0 + 1.96*u0se)) +
+  geom_hline(yintercept = 0,size = 1.2, alpha = 0.7,colour = "#EF3B2C", linetype = "twodash") +
+  xlab("Rank of residuals") +
+  ylab("School VA estimates") +
+  theme_bw()
+
+school_VA_plot
+
+```
+
+In the plot above, the red line at `y=0` represents the overall national average. Each school is represented by a point and a vertical segment, which represent the average school-specific effect and its 95% confidence interval (respectively). Schools on the left-hand side of the distribution that do not overlap with the national average line are said to be "significantly underperforming"; whereas those on the right-hand side that do not overlap the red line are "significantly overperforming". All schools that do overlap are those that can be thought of as "performing as expected". 
+
+**NB:** This is not the only tool to make such judgements about school performance; a comprehensive accountability system would involve also school inspections and qualitative judgements.
+
+***
+
+# Task 6: School predicted lines
+
+You could plot predictions for each school:
+```{r, warning=F, message=F}
+
+valueadded2 <- filter(valueadded, !is.na(ks4stand) & !is.na(ks2stand)) # this filter is necessary to avoid issues with missing values
+
+valueadded2$pred <- fitted(m1)
+
+school_plot <- ggplot(valueadded2, aes(x = ks2stand, y = pred, group = factor(schoolID))) + 
+  geom_smooth(method = "lm", colour = "black") +
+  xlab("Standardised KS2 score") +
+  ylab("Predicted KS4 score") +
+  theme_bw()
+
+school_plot
+
+```
+
+In the plot above, each line represents a school. As you can see, there is a lot of variability across schools. 
+Lines are parallel because we haven't allowed the effect of KS2 scores to vary across schools; this is a `random intercepts model`. You can compare this plot with the first one we did in practical 1, where the single-level regression line was clearly not enough to represent the extreme variability in scores. The MLM can account for that variability across schools and hence the multiple regression lines seen here are a much better representation of the observed data.

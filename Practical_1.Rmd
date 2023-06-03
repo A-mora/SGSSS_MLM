@@ -1,0 +1,193 @@
+---
+title: "Intro to MLM: Practical 1"
+author: Patricio Troncoso and Ana Morales-Gómez
+date: "June 2023"
+output: 
+  html_document:
+    code_download: yes
+    highlighter: null
+    theme: cosmo
+    toc: yes
+    toc_depth: 4
+    toc_float: yes
+    fontsize: 12pt
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+For this practical, we will use data from a sample of the Teaching dataset of The Longitudinal Study of Young People in England, 2004-2006
+available [**here**](https://beta.ukdataservice.ac.uk/datacatalogue/studies/study?id=6660).
+
+We will be fitting a series of school value-added models, which are one of the most prominent examples of multilevel models applied in education research.
+
+A traditional school value-added model is a model that attempts to isolate the "school effects" from the inherent variability/heterogeneity of the pupils. It attempts to ascertain what schools add to the progress of their pupils beyond what is expected of them, given their circumstances.
+
+<br>
+
+***
+
+# Typical workflow setup and data preparation
+
+## 1.1. Define a working directory
+
+You can use any directory in your computer. As in the example below:
+
+```{r, eval=F}
+setwd("C:/myfolder")
+```
+
+Remember to download the data to the folder you will define as working directory, as this makes matters easier.
+
+## 1.2. Load packages
+
+You can always load packages later on, but it is a good practice to load packages at the beginning of the session on the top of your script or R markdown file.
+
+In this practical, we will use the packages `haven`, `lme4` and `ggplot2`. Remember that if you haven't installed them before, you need to do so before you call the `library` function:
+
+```{}
+install.packages("haven")
+install.packages("lme4")
+install.packages("ggplot2")
+install.packages("dplyr")
+```
+
+Then you load them as such:
+
+```{r, warning=F, message=F}
+library(haven)
+library(lme4)
+library(ggplot2)
+library(dplyr)
+```
+
+## 1.3. Read in data 
+
+You can download the data from  the [**UKDS website**](https://beta.ukdataservice.ac.uk/datacatalogue/studies/study?id=6660). There are two SPSS datasets and we will be using the one named "lsype_15000_final_2011_05_04.sav".
+
+To read this dataset into R, we need to use the package `haven`:
+
+
+```{r, warning=F, message=F}
+ype<-read_sav("https://github.com/A-mora/MLM_summer-school/raw/main/data/lsype_15000_final_2011_05_04.sav")
+```
+
+<br>
+
+***
+
+## Select variables to use
+
+In England and Wales, the Department for Education (DfE) publishes periodically the so-called performance tables, in which schools are assessed (and classified) according to the progress that their pupils make from one stage to another. Secondary schools are judged on the GCSE results of their pupils and the progress they made since the end of primary, when they sat the KS2 tests.
+
+We will select the variables: pupilid, schoolID, ks2stand (KS2 scores), ks4stand (GCSE scores), gender, fsm and indschool.
+
+For this, we need to use the function `select` of the `dplyr` package:
+
+```{r, warning=F, message=F}
+
+valueadded <- select(ype, pupilid, schoolID, 
+                     ks2stand, ks4stand, gender, 
+                     fsm) 
+
+```
+
+<br>
+
+***
+
+# Task 1: Relationship between KS2 and GCSE
+
+Plot the relationship between KS2 and GCSE scores
+
+```{r, warning=F, message=F}
+
+plot1 <- ggplot(valueadded, aes(x=ks2stand, y=ks4stand)) +
+geom_point() + geom_smooth(aes(x=ks2stand, y=ks4stand), method = "lm")
+
+plot1
+
+```
+
+### Questions:
+
+1.1 What can you observe in the plot?
+
+1.2 How correlated are KS2 and GCSE scores?
+
+```{r, warning=F, message=F}
+cor(valueadded$ks2stand, valueadded$ks4stand, use="comp")
+```
+
+<br>
+
+***
+
+# Task 2: Variance components (empty) model
+
+Fit an empty multilevel model of pupils within schools
+
+```{r, warning=F, message=F}
+library(lme4)
+```
+
+We will use the `lmer` functions, which stands for "linear mixed effects regression".
+The basic syntax follows the conventions of most R packages running regression. You specify an outcome regressed `~` on variables. Each variable you add needs to be preceded by a `+` sign. You specify the data.
+
+Note that we will use Maximum Likelihood (ML), not Restricted Maximum Likelihood (REML). REML is the default in lmer, so we need to specify `REML = FALSE`
+
+Random effects are added within brackets after the fixed effects. `1` indicates that the constant is allowed to vary freely. The random effects are specified like this: `(1|level2id)`. If you want to want random slopes, you specify `(1 + variable|level2id)`
+
+
+```{r, warning=F, message=F}
+
+m0 <- lmer(ks4stand ~ 1 + (1|schoolID), data = valueadded, REML = F)
+
+summary(m0)
+
+```
+
+This model is called "type 0" value-added model in the literature
+
+### Question
+
+2.1. What is the proportion of variation that lies between schools in the empty model?
+
+2.2. What does that value mean?
+
+<br>
+
+# Task 3: Is the MLM better than a single-level model?
+
+To assess the statistical significance of the MLM, we need to compare it to a single-level model. To fit a single-level model, we type:
+
+```{r, warning=F, message=F}
+
+single <- lm(ks4stand ~ 1 , data = valueadded)
+
+summary(single)
+
+```
+
+These results are not very interesting in themselves, so we move on extract the loglikelihood and compare to the MLM.
+
+```{r, warning=F, message=F}
+
+L1 <- as.numeric(logLik(single)) # store this as numerical to re-use
+L2 <- as.numeric(logLik(m0))
+
+(D <- 2*(L2-L1)) # this is the deviance, we put it within brackets to print it immediately
+
+pchisq(q=D, df=1, lower.tail=F) # To find the p-value
+
+```
+
+### Question
+
+3.1. Is the addition of the school level statistically significant?
+
+3.2. What does this mean in practice?
+
+***

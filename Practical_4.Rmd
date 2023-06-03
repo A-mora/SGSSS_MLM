@@ -1,0 +1,156 @@
+---
+title: "Intro to MLM: Practical 4"
+author: Patricio Troncoso and Ana Morales-Gómez
+date: "June 2023"
+output: 
+  html_document:
+    code_download: yes
+    highlighter: null
+    theme: cosmo
+    toc: yes
+    toc_depth: 4
+    toc_float: yes
+    fontsize: 12pt
+---
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(haven)
+library(lme4)
+library(ggplot2)
+library(dplyr)
+ype<-read_sav("https://github.com/A-mora/MLM_summer-school/raw/main/data/lsype_15000_final_2011_05_04.sav")
+valueadded <- select(ype, pupilid, schoolID, 
+                     ks2stand, ks4stand, gender, 
+                     fsm)
+```
+
+# Random slopes model
+
+Following up from practical 2, we will continue to build up our multilevel model for school effects by adding a random slope for prior attainment.
+
+***
+
+# Task 1: Fit a random slopes model
+
+We have theoretical reasons to believe that the effect of KS2 varies across schools, since some schools do seem to make their pupils progress more than others. To test this hypothesis, we fit a `random slopes model` by running the following code: 
+
+```{r, warning=F, message=F}
+
+m1_rs <- lmer(ks4stand ~ as.vector(scale(ks2stand))+
+              (1 + as.vector(scale(ks2stand))|schoolID), data = valueadded, REML = F)
+
+# Note that KS2 have been added like this "as.vector(scale(ks2stand))". This is done to prevent a convergence error. The function "scale" rescales KS2 scores to units of standard deviation, i.e. it "standardises".
+
+summary(m1_rs)
+```
+
+### Question
+
+1.1. What is the correlation between the intercept and the slope?
+
+1.2. What sort of pattern is it?
+
+***
+
+# Task 2: Compare the fit of the random slopes model to the random intercepts model
+
+To compare the `random intercepts models` with the `random slopes model`, we first run the random intercepts model again
+
+```{r, warning=F, message=F}
+m1 <- lmer(ks4stand ~ ks2stand + (1|schoolID), data = valueadded, REML = F)
+anova(m1, m1_rs)
+```
+
+And then we compare using the `anova` function in R:
+
+```{r, warning=F, message=F}
+anova(m1, m1_rs)
+```
+
+### Question:
+
+2.1. Is the random slope specification a significant addition to the model?
+
+The results indicate that, even though more complex (2 extra parameters), the `random slopes model` has a significantly better fit than the `random intercepts model`.
+
+***
+
+# Task 3: Visualising results
+
+To plot the school predicted lines, we can retrieve the fitted values from the model `m1_rs`, as such:
+
+```{r, warning=F, message=F}
+valueadded2 <- filter(valueadded, !is.na(ks4stand) & !is.na(ks2stand)) # this filter is necessary to avoid issues with missing values
+
+valueadded2$pred_rs<-fitted(m1_rs)
+```
+
+Then we can plot the predicted school results by typing:
+
+```{r, warning=F, message=F}
+school_plot_rs<-ggplot(valueadded2, aes(x=ks2stand, y=pred_rs, group=factor(schoolID))) + 
+  geom_smooth(method="lm", colour="black") +
+  xlab("Standardised KS2 score") +
+  ylab("Predicted KS4 score") +
+  theme_bw()
+
+school_plot_rs
+```
+
+Voilà! School predicted scores have varying slopes for the relationship between KS2 and GCSE scores. You can see that pupils in some schools make more progress than others on average and some make less. 
+
+### Question
+
+3.1. What sort of pattern is this?
+
+<br>
+
+***
+
+# Task 4: Checking assumptions
+
+We will check the assumptions for the `random intercepts` model (**m1**). 
+
+You can also plot the higher-level (school) residuals to check for normality
+
+```{r, warning=F, message=F}
+u0 <- ranef(m1, condVar = TRUE) # These are the residuals from model "m1"
+
+hist(u0$schoolID$`(Intercept)`) # Histogram for school residuals
+
+qqnorm(u0$schoolID$`(Intercept)`, pch = 1, frame = FALSE) # Q-Q plot for school residuals
+qqline(u0$schoolID$`(Intercept)`, col = "steelblue", lwd = 2) # Q-Q plot for school residuals
+```
+
+You can also plot individual-level to check for normality
+
+```{r, warning=F, message=F}
+
+valueadded2$ind_resid <- residuals(m1)
+
+hist(valueadded2$ind_resid)
+
+qqnorm(valueadded2$ind_resid, pch = 1, frame = FALSE)
+qqline(valueadded2$ind_resid, col = "steelblue", lwd = 2)
+
+```
+
+And finally, you can plot individual-level residuals against the predicted values:
+
+```{r, warning=F, message=F}
+
+valueadded2$pred <- fitted(m1) # retrieve predicted values from model m1
+
+homoscedasticity <- ggplot(valueadded2, aes(y = ind_resid, x = pred)) + geom_point()
+
+homoscedasticity
+
+```
+
+### Questions
+
+4.1. Is the normality assumption reasonable at the school level?
+
+4.2. Is the normality assumption reasonable at the pupil level?
+
+4.3. Is it reasonable to assume homoscedasticity?

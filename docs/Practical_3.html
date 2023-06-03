@@ -1,0 +1,801 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+<meta charset="utf-8" />
+<meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
+
+
+<meta name="author" content="Ana Morales-Gómez and Patricio Troncoso" />
+
+
+<title>Intro to MLM: Practical 3</title>
+
+<script src="site_libs/header-attrs-2.20/header-attrs.js"></script>
+<script src="site_libs/jquery-3.6.0/jquery-3.6.0.min.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link href="site_libs/bootstrap-3.3.5/css/cosmo.min.css" rel="stylesheet" />
+<script src="site_libs/bootstrap-3.3.5/js/bootstrap.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/html5shiv.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/respond.min.js"></script>
+<style>h1 {font-size: 34px;}
+       h1.title {font-size: 38px;}
+       h2 {font-size: 30px;}
+       h3 {font-size: 24px;}
+       h4 {font-size: 18px;}
+       h5 {font-size: 16px;}
+       h6 {font-size: 12px;}
+       code {color: inherit; background-color: rgba(0, 0, 0, 0.04);}
+       pre:not([class]) { background-color: white }</style>
+<script src="site_libs/jqueryui-1.11.4/jquery-ui.min.js"></script>
+<link href="site_libs/tocify-1.9.1/jquery.tocify.css" rel="stylesheet" />
+<script src="site_libs/tocify-1.9.1/jquery.tocify.js"></script>
+<script src="site_libs/navigation-1.1/tabsets.js"></script>
+<script src="site_libs/navigation-1.1/codefolding.js"></script>
+<script src="site_libs/navigation-1.1/sourceembed.js"></script>
+<link href="site_libs/highlightjs-9.12.0/default.css" rel="stylesheet" />
+<script src="site_libs/highlightjs-9.12.0/highlight.js"></script>
+
+<style type="text/css">
+  code{white-space: pre-wrap;}
+  span.smallcaps{font-variant: small-caps;}
+  span.underline{text-decoration: underline;}
+  div.column{display: inline-block; vertical-align: top; width: 50%;}
+  div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+  ul.task-list{list-style: none;}
+    </style>
+
+<style type="text/css">code{white-space: pre;}</style>
+<script type="text/javascript">
+if (window.hljs) {
+  hljs.configure({languages: []});
+  hljs.initHighlightingOnLoad();
+  if (document.readyState && document.readyState === "complete") {
+    window.setTimeout(function() { hljs.initHighlighting(); }, 0);
+  }
+}
+</script>
+
+
+
+
+<style type="text/css">
+#rmd-source-code {
+  display: none;
+}
+</style>
+
+
+
+
+
+<style type = "text/css">
+.main-container {
+  max-width: 940px;
+  margin-left: auto;
+  margin-right: auto;
+}
+img {
+  max-width:100%;
+}
+.tabbed-pane {
+  padding-top: 12px;
+}
+.html-widget {
+  margin-bottom: 20px;
+}
+button.code-folding-btn:focus {
+  outline: none;
+}
+summary {
+  display: list-item;
+}
+details > summary > p:only-child {
+  display: inline;
+}
+pre code {
+  padding: 0;
+}
+</style>
+
+
+<style type="text/css">
+.dropdown-submenu {
+  position: relative;
+}
+.dropdown-submenu>.dropdown-menu {
+  top: 0;
+  left: 100%;
+  margin-top: -6px;
+  margin-left: -1px;
+  border-radius: 0 6px 6px 6px;
+}
+.dropdown-submenu:hover>.dropdown-menu {
+  display: block;
+}
+.dropdown-submenu>a:after {
+  display: block;
+  content: " ";
+  float: right;
+  width: 0;
+  height: 0;
+  border-color: transparent;
+  border-style: solid;
+  border-width: 5px 0 5px 5px;
+  border-left-color: #cccccc;
+  margin-top: 5px;
+  margin-right: -10px;
+}
+.dropdown-submenu:hover>a:after {
+  border-left-color: #adb5bd;
+}
+.dropdown-submenu.pull-left {
+  float: none;
+}
+.dropdown-submenu.pull-left>.dropdown-menu {
+  left: -100%;
+  margin-left: 10px;
+  border-radius: 6px 0 6px 6px;
+}
+</style>
+
+<script type="text/javascript">
+// manage active state of menu based on current page
+$(document).ready(function () {
+  // active menu anchor
+  href = window.location.pathname
+  href = href.substr(href.lastIndexOf('/') + 1)
+  if (href === "")
+    href = "index.html";
+  var menuAnchor = $('a[href="' + href + '"]');
+
+  // mark the anchor link active (and if it's in a dropdown, also mark that active)
+  var dropdown = menuAnchor.closest('li.dropdown');
+  if (window.bootstrap) { // Bootstrap 4+
+    menuAnchor.addClass('active');
+    dropdown.find('> .dropdown-toggle').addClass('active');
+  } else { // Bootstrap 3
+    menuAnchor.parent().addClass('active');
+    dropdown.addClass('active');
+  }
+
+  // Navbar adjustments
+  var navHeight = $(".navbar").first().height() + 15;
+  var style = document.createElement('style');
+  var pt = "padding-top: " + navHeight + "px; ";
+  var mt = "margin-top: -" + navHeight + "px; ";
+  var css = "";
+  // offset scroll position for anchor links (for fixed navbar)
+  for (var i = 1; i <= 6; i++) {
+    css += ".section h" + i + "{ " + pt + mt + "}\n";
+  }
+  style.innerHTML = "body {" + pt + "padding-bottom: 40px; }\n" + css;
+  document.head.appendChild(style);
+});
+</script>
+
+<!-- tabsets -->
+
+<style type="text/css">
+.tabset-dropdown > .nav-tabs {
+  display: inline-table;
+  max-height: 500px;
+  min-height: 44px;
+  overflow-y: auto;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+.tabset-dropdown > .nav-tabs > li.active:before, .tabset-dropdown > .nav-tabs.nav-tabs-open:before {
+  content: "\e259";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li.active:before {
+  content: "\e258";
+  font-family: 'Glyphicons Halflings';
+  border: none;
+}
+
+.tabset-dropdown > .nav-tabs > li.active {
+  display: block;
+}
+
+.tabset-dropdown > .nav-tabs > li > a,
+.tabset-dropdown > .nav-tabs > li > a:focus,
+.tabset-dropdown > .nav-tabs > li > a:hover {
+  border: none;
+  display: inline-block;
+  border-radius: 4px;
+  background-color: transparent;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li {
+  display: block;
+  float: none;
+}
+
+.tabset-dropdown > .nav-tabs > li {
+  display: none;
+}
+</style>
+
+<!-- code folding -->
+<style type="text/css">
+.code-folding-btn { margin-bottom: 4px; }
+</style>
+
+
+
+<style type="text/css">
+
+#TOC {
+  margin: 25px 0px 20px 0px;
+}
+@media (max-width: 768px) {
+#TOC {
+  position: relative;
+  width: 100%;
+}
+}
+
+@media print {
+.toc-content {
+  /* see https://github.com/w3c/csswg-drafts/issues/4434 */
+  float: right;
+}
+}
+
+.toc-content {
+  padding-left: 30px;
+  padding-right: 40px;
+}
+
+div.main-container {
+  max-width: 1200px;
+}
+
+div.tocify {
+  width: 20%;
+  max-width: 260px;
+  max-height: 85%;
+}
+
+@media (min-width: 768px) and (max-width: 991px) {
+  div.tocify {
+    width: 25%;
+  }
+}
+
+@media (max-width: 767px) {
+  div.tocify {
+    width: 100%;
+    max-width: none;
+  }
+}
+
+.tocify ul, .tocify li {
+  line-height: 20px;
+}
+
+.tocify-subheader .tocify-item {
+  font-size: 0.90em;
+}
+
+.tocify .list-group-item {
+  border-radius: 0px;
+}
+
+
+</style>
+
+
+
+</head>
+
+<body>
+
+
+<div class="container-fluid main-container">
+
+
+<!-- setup 3col/9col grid for toc_float and main content  -->
+<div class="row">
+<div class="col-xs-12 col-sm-4 col-md-3">
+<div id="TOC" class="tocify">
+</div>
+</div>
+
+<div class="toc-content col-xs-12 col-sm-8 col-md-9">
+
+
+
+
+<div class="navbar navbar-default  navbar-fixed-top" role="navigation">
+  <div class="container">
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-bs-toggle="collapse" data-target="#navbar" data-bs-target="#navbar">
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="index.html">Multilevel Model</a>
+    </div>
+    <div id="navbar" class="navbar-collapse collapse">
+      <ul class="nav navbar-nav">
+        <li>
+  <a href="index.html">Home</a>
+</li>
+<li>
+  <a href="Practical_1.html">Practical 1</a>
+</li>
+<li>
+  <a href="Practical_2.html">Practical 2</a>
+</li>
+<li>
+  <a href="Practical_3.html">Practical 3</a>
+</li>
+<li>
+  <a href="Practical_4.html">Practical 4</a>
+</li>
+<li>
+  <a href="Solutions.html">Solutions</a>
+</li>
+      </ul>
+      <ul class="nav navbar-nav navbar-right">
+        
+      </ul>
+    </div><!--/.nav-collapse -->
+  </div><!--/.container -->
+</div><!--/.navbar -->
+
+<div id="header">
+
+<div class="btn-group pull-right float-right">
+<button type="button" class="btn btn-default btn-xs btn-secondary btn-sm dropdown-toggle" data-toggle="dropdown" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><span>Code</span> <span class="caret"></span></button>
+<ul class="dropdown-menu dropdown-menu-right" style="min-width: 50px;">
+<li><a id="rmd-download-source" href="#">Download Rmd</a></li>
+</ul>
+</div>
+
+
+
+<h1 class="title toc-ignore">Intro to MLM: Practical 3</h1>
+<h4 class="author">Ana Morales-Gómez and Patricio Troncoso</h4>
+<h4 class="date">June 2023</h4>
+
+</div>
+
+
+<p>For this practical, we will use data from a sample of the Teaching
+dataset of the Health Survey for England (2003-2005), which is available
+<a
+href="https://beta.ukdataservice.ac.uk/datacatalogue/studies/study?id=6765"><strong>here</strong></a>.</p>
+<p>We will be fitting a series of binary logistic multilevel models for
+the probability of being overweight or obese.</p>
+<p>The traditional measure used to determine whether an adult is
+overweight is the Body-Mass Index (BMI).</p>
+<p>For an adult to be considered overweight, their BMI must be between
+25 and 30. Meanwhile values over 30 are considered as “obese”.</p>
+<p><br></p>
+<hr />
+<div id="typical-workflow-setup-and-data-preparation"
+class="section level1">
+<h1>Typical workflow setup and data preparation</h1>
+<div id="define-a-working-directory" class="section level2">
+<h2>1.1. Define a working directory</h2>
+<p>You can use any directory in your computer. As in the example
+below:</p>
+<pre class="r"><code>setwd(&quot;C:/myfolder&quot;)</code></pre>
+<p>Remember to download the data to the folder you will define as
+working directory, as this makes matters easier.</p>
+</div>
+<div id="load-packages" class="section level2">
+<h2>1.2. Load packages</h2>
+<p>You can always load packages later on, but it is a good practice to
+load packages at the beginning of the session on the top of your script
+or R markdown file.</p>
+<p>In this practical, we will use the packages <code>haven</code>,
+<code>lme4</code> and <code>ggplot2</code>. Remember that if you haven’t
+installed them before, you need to do so before you call the
+<code>library</code> function:</p>
+<pre><code>install.packages(&quot;tidyverse&quot;)
+install.packages(&quot;haven&quot;)
+install.packages(&quot;lme4&quot;)
+install.packages(&quot;ggplot2&quot;)
+install.packages(&quot;dplyr&quot;)
+install.packages(&quot;broom.mixed&quot;)</code></pre>
+<p>Then you load them as such:</p>
+<pre class="r"><code>library(haven)
+library(lme4)
+library(ggplot2)
+library(dplyr)
+library(tidyverse)
+library(broom.mixed)</code></pre>
+</div>
+<div id="read-in-data" class="section level2">
+<h2>1.3. Read in data</h2>
+<p>You can download the data from the <a
+href="https://beta.ukdataservice.ac.uk/datacatalogue/studies/study?id=6765"><strong>UKDS
+website</strong></a>. There are four files in different formats. We will
+be using the Stata dataset named: “hse_data_for_workshop.dta”.</p>
+<p>To read this dataset into R, we need to use the package
+<code>haven</code>:</p>
+<pre class="r"><code>hse &lt;- read_dta(&quot;https://github.com/A-mora/MLM_summer-school/raw/main/data/hse_data_for_workshop.dta&quot;)</code></pre>
+<p><br></p>
+<hr />
+</div>
+<div id="select-variables-to-use" class="section level2">
+<h2>Select variables to use</h2>
+<p>The dataset has many different variables, but we’re not going to be
+using all of them, so for easier work, we will select the following:
+<code>year</code>, <code>pserial</code>, <code>area</code>,
+<code>bmival</code>, <code>sex</code>, <code>age</code> and
+<code>ethnic</code>.</p>
+<p><code>year</code> is the year where the measures were taken</p>
+<p><code>pserial</code> is the anonymised person identifier</p>
+<p><code>area</code> is the anonymised postcode of the person</p>
+<p><code>bmival</code> is the valid measure of BMI</p>
+<p><code>sex</code> coded 0 for Men and 1 for Women</p>
+<p><code>age</code> from 0 to 99</p>
+<p><code>ethnic</code> coded 1 for White; 2 for Mixed; 3 for Asian or
+Asian British; 4 for Black or Black British and 5 for Chinese or any
+other group</p>
+<p>For a detailed description of these variables, have a look in the
+documentation downloaded alongside with the data. <strong>Spoiler
+alert:</strong> You will also find a complete set of materials for a
+workshop on MLM.</p>
+<p>To select variables, we (unsurprisingly) need to use the function
+<code>select</code> of the <code>dplyr</code> package:</p>
+<pre class="r"><code>hse2 &lt;- select(hse, year, pserial, area, bmival, sex, age, ethnic, bmival) </code></pre>
+<p><br></p>
+<hr />
+</div>
+</div>
+<div id="preliminary-tasks" class="section level1">
+<h1>Preliminary tasks</h1>
+<p>We need to dichotomise our dependent variable <code>bmival</code>. As
+we mentioned before, the categories “overweight” and “obese” are for
+those with a BMI over 25 and 30, respectively, so we need to do the
+following to our continuous BMI measure:</p>
+<pre class="r"><code>hse2$bmi_bin &lt;- ifelse(hse2$bmival &gt;= 25, 1, 0)</code></pre>
+<p>To check this is done correctly, you can run a simple frequency
+table:</p>
+<pre class="r"><code>table(hse2$bmi_bin)</code></pre>
+<pre><code>## 
+##     0     1 
+## 14751 15873</code></pre>
+<p>If there are more than two values there, then something must have
+gone wrong.</p>
+<p>Also, given that the BMI in children is done differently, we will
+remove all under-18 individuals. We do this by typing:</p>
+<pre class="r"><code>hse2 &lt;- hse2 %&gt;% filter(age&gt;18)</code></pre>
+</div>
+<div id="task-1-fit-an-empty-model" class="section level1">
+<h1>Task 1: Fit an empty model</h1>
+<p>We will start by fitting an empty multilevel model for the propensity
+of being overweight in people nested in areas.</p>
+<pre class="r"><code>empty &lt;- glmer(bmi_bin ~ 1 + (1|area), data = hse2, family = binomial(&quot;logit&quot;))
+
+summary(empty)</code></pre>
+<pre><code>## Generalized linear mixed model fit by maximum likelihood (Laplace
+##   Approximation) [glmerMod]
+##  Family: binomial  ( logit )
+## Formula: bmi_bin ~ 1 + (1 | area)
+##    Data: hse2
+## 
+##      AIC      BIC   logLik deviance df.resid 
+##  31279.3  31295.5 -15637.6  31275.3    23895 
+## 
+## Scaled residuals: 
+##     Min      1Q  Median      3Q     Max 
+## -1.6139 -1.2694  0.7115  0.7547  0.9025 
+## 
+## Random effects:
+##  Groups Name        Variance Std.Dev.
+##  area   (Intercept) 0.06817  0.2611  
+## Number of obs: 23897, groups:  area, 1833
+## 
+## Fixed effects:
+##             Estimate Std. Error z value Pr(&gt;|z|)    
+## (Intercept)   0.5641     0.0153   36.87   &lt;2e-16 ***
+## ---
+## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1</code></pre>
+<p><br></p>
+<div id="questions" class="section level3">
+<h3>Questions:</h3>
+<p>1.1 What is the overall probability of being overweight?</p>
+<p>Remember this formula:</p>
+<p><span
+class="math display">\[logit(p_i)=\log\left(\frac{p_{i}}{1-p_{i}}\right)\]</span>
+To get the odds from the estimated coefficients, you use the exponent
+function:</p>
+<p><span class="math display">\[exp(\beta)=odds\]</span></p>
+<p>Then, to convert to probability, you can do this:</p>
+<p><span class="math display">\[p = \frac{odds}{1 + odds}\]</span></p>
+<pre class="r"><code>odds &lt;- exp(empty@beta) # this is to retrieve the intercept from the model
+
+prob &lt;- odds/(1 + odds) # to estimate the overall probability
+
+prob # to print the result to the screen</code></pre>
+<pre><code>## [1] 0.6374097</code></pre>
+<p>1.2 What is the VPC for this model?</p>
+<p><span class="math display">\[VPC = \frac{\sigma_u^2}{\sigma_u^2 +
+\sigma_e^2*}\]</span> where <span class="math inline">\(\sigma_e^2*=
+\frac{\pi^2}{3} \approx 3.29\)</span></p>
+<pre class="r"><code>lev2var &lt;- as.numeric(VarCorr(empty)) # this is to retrieve the level 2 variance from the model
+
+(lev2var)/(lev2var+3.29) # VPC</code></pre>
+<pre><code>## [1] 0.02029849</code></pre>
+<p><br></p>
+<hr />
+</div>
+</div>
+<div id="task-2-is-the-mlm-better-than-a-single-level-model"
+class="section level1">
+<h1>Task 2: Is the MLM better than a single-level model?</h1>
+<p>To assess the statistical significance of the MLM, we need to compare
+it to a single-level model. To fit a single-level model, we type:</p>
+<pre class="r"><code>single &lt;- glm(bmi_bin ~ 1 , data = hse2, family = binomial(&quot;logit&quot;))
+
+summary(single)</code></pre>
+<pre><code>## 
+## Call:
+## glm(formula = bmi_bin ~ 1, family = binomial(&quot;logit&quot;), data = hse2)
+## 
+## Deviance Residuals: 
+##     Min       1Q   Median       3Q      Max  
+## -1.4234  -1.4234   0.9499   0.9499   0.9499  
+## 
+## Coefficients:
+##             Estimate Std. Error z value Pr(&gt;|z|)    
+## (Intercept)  0.56193    0.01345   41.77   &lt;2e-16 ***
+## ---
+## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
+## 
+## (Dispersion parameter for binomial family taken to be 1)
+## 
+##     Null deviance: 31314  on 23896  degrees of freedom
+## Residual deviance: 31314  on 23896  degrees of freedom
+##   (4034 observations deleted due to missingness)
+## AIC: 31316
+## 
+## Number of Fisher Scoring iterations: 4</code></pre>
+<p>These results are not very interesting in themselves, so we move on
+extract the loglikelihood and compare to the MLM.</p>
+<pre class="r"><code>L1 &lt;- as.numeric(logLik(single)) # store this as numerical to re-use
+L2 &lt;- as.numeric(logLik(empty))
+
+(D &lt;- 2*(L2-L1)) # this is the deviance, we put it within brackets to print it immediately</code></pre>
+<pre><code>## [1] 38.42078</code></pre>
+<pre class="r"><code>pchisq(q=D, df=1, lower.tail=F) # To find the p-value</code></pre>
+<pre><code>## [1] 5.702211e-10</code></pre>
+<div id="question" class="section level3">
+<h3>Question</h3>
+<p>2.1. Is the addition of the area level statistically significant?</p>
+<p>2.2. What does this mean in practice?</p>
+<hr />
+</div>
+</div>
+<div id="task-3-random-intercepts-model" class="section level1">
+<h1>Task 3: Random intercepts model</h1>
+<p>Just like in the case of normally-distributed responses, we can fit a
+<code>random intercepts</code> model by adding explanatory
+variables.</p>
+<p>We want to find out whether there any differences between males and
+females on the probability of being overweight.</p>
+<pre class="r"><code>rand_int &lt;- glmer(bmi_bin ~ factor(sex) + (1|area), data = hse2, family = binomial(&quot;logit&quot;))
+
+summary(rand_int)</code></pre>
+<pre><code>## Generalized linear mixed model fit by maximum likelihood (Laplace
+##   Approximation) [glmerMod]
+##  Family: binomial  ( logit )
+## Formula: bmi_bin ~ factor(sex) + (1 | area)
+##    Data: hse2
+## 
+##      AIC      BIC   logLik deviance df.resid 
+##  30962.2  30986.4 -15478.1  30956.2    23894 
+## 
+## Scaled residuals: 
+##     Min      1Q  Median      3Q     Max 
+## -1.9006 -1.1735  0.6406  0.7871  1.0249 
+## 
+## Random effects:
+##  Groups Name        Variance Std.Dev.
+##  area   (Intercept) 0.07516  0.2742  
+## Number of obs: 23897, groups:  area, 1833
+## 
+## Fixed effects:
+##              Estimate Std. Error z value Pr(&gt;|z|)    
+## (Intercept)   0.84265    0.02246   37.52   &lt;2e-16 ***
+## factor(sex)1 -0.49290    0.02781  -17.72   &lt;2e-16 ***
+## ---
+## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
+## 
+## Correlation of Fixed Effects:
+##             (Intr)
+## factor(sx)1 -0.722</code></pre>
+<p>We can also get a more “human-readable” version of the table of
+coefficients by using the package <code>broom.mixed</code>:</p>
+<pre class="r"><code>(m1 &lt;- tidy(rand_int, effects = &quot;fixed&quot;,
+          conf.int=TRUE, 
+          exponentiate=FALSE))</code></pre>
+<pre><code>## # A tibble: 2 × 8
+##   effect term         estimate std.error statistic  p.value conf.low conf.high
+##   &lt;chr&gt;  &lt;chr&gt;           &lt;dbl&gt;     &lt;dbl&gt;     &lt;dbl&gt;    &lt;dbl&gt;    &lt;dbl&gt;     &lt;dbl&gt;
+## 1 fixed  (Intercept)     0.843    0.0225      37.5 0           0.799     0.887
+## 2 fixed  factor(sex)1   -0.493    0.0278     -17.7 2.78e-70   -0.547    -0.438</code></pre>
+<p>You can plot these for easier inspection:</p>
+<pre class="r"><code>(m1_plot &lt;- 
+    ggplot(m1, 
+           mapping = aes(x= estimate,
+                         y = term, 
+                         xmin = conf.low, 
+                         xmax = conf.high)) +
+    geom_vline(xintercept = 0, color = &quot;tomato&quot;, size =1) +
+    geom_pointrange() +
+    theme_classic())</code></pre>
+<pre><code>## Warning: Using `size` aesthetic for lines was deprecated in ggplot2 3.4.0.
+## ℹ Please use `linewidth` instead.</code></pre>
+<p><img src="Practical_3_files/figure-html/unnamed-chunk-15-1.png" width="672" /></p>
+<p>If you want to obtain the odds ratios, you can change the option
+<code>exponentiate</code> to <code>TRUE</code>.</p>
+<pre class="r"><code>(m1_odds &lt;- tidy(rand_int, effects = &quot;fixed&quot;,
+          conf.int=TRUE, 
+          exponentiate=TRUE))</code></pre>
+<pre><code>## # A tibble: 2 × 8
+##   effect term         estimate std.error statistic  p.value conf.low conf.high
+##   &lt;chr&gt;  &lt;chr&gt;           &lt;dbl&gt;     &lt;dbl&gt;     &lt;dbl&gt;    &lt;dbl&gt;    &lt;dbl&gt;     &lt;dbl&gt;
+## 1 fixed  (Intercept)     2.32     0.0522      37.5 0           2.22      2.43 
+## 2 fixed  factor(sex)1    0.611    0.0170     -17.7 2.78e-70    0.578     0.645</code></pre>
+<p>Unsurprisingly, you can plot the odds for easier inspection:</p>
+<pre class="r"><code>(m1_odds_plot &lt;- 
+    ggplot(m1_odds, 
+           mapping = aes(x= estimate,
+                         y = term, 
+                         xmin = conf.low, 
+                         xmax = conf.high)) +
+    geom_vline(xintercept = 1, color = &quot;tomato&quot;, size =1) +
+    geom_pointrange() +
+    theme_classic())</code></pre>
+<p><img src="Practical_3_files/figure-html/unnamed-chunk-17-1.png" width="672" /></p>
+<div id="question-1" class="section level3">
+<h3>Question:</h3>
+<p>3.1. What is the effect of sex on being overweight?</p>
+<p>3.2. What is the probability of a female being overweight in this
+sample?</p>
+<hr />
+</div>
+</div>
+<div id="task-4-area-specific-estimates" class="section level1">
+<h1>Task 4: Area-specific estimates</h1>
+<p>Just like in task 5 of practical 2, we can retrieve the residuals
+from the <code>random intercepts</code> and plot them to find out which
+areas have more or less than average people who are overweight.</p>
+<p>This is what is sometimes called in the literature a “Caterpillar
+plot”.</p>
+<pre class="r"><code>m2 &lt;- tidy(rand_int, effects = &quot;ran_vals&quot;,
+          conf.int=TRUE,
+          exponentiate=FALSE)
+
+(RE &lt;- m2 %&gt;%
+    mutate(level = fct_reorder(level, estimate)) %&gt;%
+    ggplot( mapping = aes(x= estimate,
+                         y = level, 
+                         xmin = conf.low, 
+                         xmax = conf.high)) +
+    geom_vline(xintercept = 0, color = &quot;tomato&quot;, size =1) +
+    coord_flip() +
+    labs(x = &quot;logit&quot;,
+         y = &quot;Areas&quot;) +
+    geom_pointrange() +
+    theme_classic())</code></pre>
+<p><img src="Practical_3_files/figure-html/unnamed-chunk-18-1.png" width="672" /></p>
+<div id="question-2" class="section level3">
+<h3>Question:</h3>
+<p>4.1. Are there any areas that are significantly above or below
+average?</p>
+<hr />
+</div>
+</div>
+<div id="additional-tasks" class="section level1">
+<h1>Additional tasks</h1>
+<p>You can borrow from practical 2 and repeat some of the tasks there,
+such as:</p>
+<ul>
+<li><p>adding more explanatory variables</p></li>
+<li><p>adding interaction effects</p></li>
+<li><p>plot predictions.</p></li>
+</ul>
+</div>
+
+<div id="rmd-source-code">LS0tDQp0aXRsZTogIkludHJvIHRvIE1MTTogUHJhY3RpY2FsIDMiDQphdXRob3I6IEFuYSBNb3JhbGVzLUfDs21leiBhbmQgUGF0cmljaW8gVHJvbmNvc28gDQpkYXRlOiAiSnVuZSAyMDIzIg0Kb3V0cHV0OiANCiAgaHRtbF9kb2N1bWVudDoNCiAgICBjb2RlX2Rvd25sb2FkOiB5ZXMNCiAgICBoaWdobGlnaHRlcjogbnVsbA0KICAgIHRoZW1lOiBjb3Ntbw0KICAgIHRvYzogeWVzDQogICAgdG9jX2RlcHRoOiA0DQogICAgdG9jX2Zsb2F0OiB5ZXMNCiAgICBmb250c2l6ZTogMTJwdA0KLS0tDQoNCmBgYHtyIHNldHVwLCBpbmNsdWRlPUZBTFNFfQ0Ka25pdHI6Om9wdHNfY2h1bmskc2V0KGVjaG8gPSBUUlVFKQ0KYGBgDQoNCg0KRm9yIHRoaXMgcHJhY3RpY2FsLCB3ZSB3aWxsIHVzZSBkYXRhIGZyb20gYSBzYW1wbGUgb2YgdGhlIFRlYWNoaW5nIGRhdGFzZXQgb2YgdGhlIEhlYWx0aCBTdXJ2ZXkgZm9yIEVuZ2xhbmQgKDIwMDMtMjAwNSksIHdoaWNoIGlzDQphdmFpbGFibGUgWyoqaGVyZSoqXShodHRwczovL2JldGEudWtkYXRhc2VydmljZS5hYy51ay9kYXRhY2F0YWxvZ3VlL3N0dWRpZXMvc3R1ZHk/aWQ9Njc2NSkuDQoNCldlIHdpbGwgYmUgZml0dGluZyBhIHNlcmllcyBvZiBiaW5hcnkgbG9naXN0aWMgbXVsdGlsZXZlbCBtb2RlbHMgZm9yIHRoZSBwcm9iYWJpbGl0eSBvZiBiZWluZyBvdmVyd2VpZ2h0IG9yIG9iZXNlLg0KDQpUaGUgdHJhZGl0aW9uYWwgbWVhc3VyZSB1c2VkIHRvIGRldGVybWluZSB3aGV0aGVyIGFuIGFkdWx0IGlzIG92ZXJ3ZWlnaHQgaXMgdGhlIEJvZHktTWFzcyBJbmRleCAoQk1JKS4NCg0KRm9yIGFuIGFkdWx0IHRvIGJlIGNvbnNpZGVyZWQgb3ZlcndlaWdodCwgdGhlaXIgQk1JIG11c3QgYmUgYmV0d2VlbiAyNSBhbmQgMzAuIE1lYW53aGlsZSB2YWx1ZXMgb3ZlciAzMCBhcmUgY29uc2lkZXJlZCBhcyAib2Jlc2UiLg0KDQo8YnI+DQoNCioqKg0KDQojIFR5cGljYWwgd29ya2Zsb3cgc2V0dXAgYW5kIGRhdGEgcHJlcGFyYXRpb24NCg0KIyMgMS4xLiBEZWZpbmUgYSB3b3JraW5nIGRpcmVjdG9yeQ0KDQpZb3UgY2FuIHVzZSBhbnkgZGlyZWN0b3J5IGluIHlvdXIgY29tcHV0ZXIuIEFzIGluIHRoZSBleGFtcGxlIGJlbG93Og0KDQpgYGB7ciwgZXZhbD1GfQ0Kc2V0d2QoIkM6L215Zm9sZGVyIikNCmBgYA0KDQpSZW1lbWJlciB0byBkb3dubG9hZCB0aGUgZGF0YSB0byB0aGUgZm9sZGVyIHlvdSB3aWxsIGRlZmluZSBhcyB3b3JraW5nIGRpcmVjdG9yeSwgYXMgdGhpcyBtYWtlcyBtYXR0ZXJzIGVhc2llci4NCg0KIyMgMS4yLiBMb2FkIHBhY2thZ2VzDQoNCllvdSBjYW4gYWx3YXlzIGxvYWQgcGFja2FnZXMgbGF0ZXIgb24sIGJ1dCBpdCBpcyBhIGdvb2QgcHJhY3RpY2UgdG8gbG9hZCBwYWNrYWdlcyBhdCB0aGUgYmVnaW5uaW5nIG9mIHRoZSBzZXNzaW9uIG9uIHRoZSB0b3Agb2YgeW91ciBzY3JpcHQgb3IgUiBtYXJrZG93biBmaWxlLg0KDQpJbiB0aGlzIHByYWN0aWNhbCwgd2Ugd2lsbCB1c2UgdGhlIHBhY2thZ2VzIGBoYXZlbmAsIGBsbWU0YCBhbmQgYGdncGxvdDJgLiBSZW1lbWJlciB0aGF0IGlmIHlvdSBoYXZlbid0IGluc3RhbGxlZCB0aGVtIGJlZm9yZSwgeW91IG5lZWQgdG8gZG8gc28gYmVmb3JlIHlvdSBjYWxsIHRoZSBgbGlicmFyeWAgZnVuY3Rpb246DQoNCmBgYHt9DQppbnN0YWxsLnBhY2thZ2VzKCJ0aWR5dmVyc2UiKQ0KaW5zdGFsbC5wYWNrYWdlcygiaGF2ZW4iKQ0KaW5zdGFsbC5wYWNrYWdlcygibG1lNCIpDQppbnN0YWxsLnBhY2thZ2VzKCJnZ3Bsb3QyIikNCmluc3RhbGwucGFja2FnZXMoImRwbHlyIikNCmluc3RhbGwucGFja2FnZXMoImJyb29tLm1peGVkIikNCmBgYA0KDQpUaGVuIHlvdSBsb2FkIHRoZW0gYXMgc3VjaDoNCg0KYGBge3IsIHdhcm5pbmc9RiwgbWVzc2FnZT1GfQ0KbGlicmFyeShoYXZlbikNCmxpYnJhcnkobG1lNCkNCmxpYnJhcnkoZ2dwbG90MikNCmxpYnJhcnkoZHBseXIpDQpsaWJyYXJ5KHRpZHl2ZXJzZSkNCmxpYnJhcnkoYnJvb20ubWl4ZWQpDQpgYGANCg0KIyMgMS4zLiBSZWFkIGluIGRhdGEgDQoNCllvdSBjYW4gZG93bmxvYWQgdGhlIGRhdGEgZnJvbSAgdGhlIFsqKlVLRFMgd2Vic2l0ZSoqXShodHRwczovL2JldGEudWtkYXRhc2VydmljZS5hYy51ay9kYXRhY2F0YWxvZ3VlL3N0dWRpZXMvc3R1ZHk/aWQ9Njc2NSkuIFRoZXJlIGFyZSBmb3VyIGZpbGVzIGluIGRpZmZlcmVudCBmb3JtYXRzLiBXZSB3aWxsIGJlIHVzaW5nIHRoZSBTdGF0YSBkYXRhc2V0IG5hbWVkOiAiaHNlX2RhdGFfZm9yX3dvcmtzaG9wLmR0YSIuDQoNClRvIHJlYWQgdGhpcyBkYXRhc2V0IGludG8gUiwgd2UgbmVlZCB0byB1c2UgdGhlIHBhY2thZ2UgYGhhdmVuYDoNCg0KDQpgYGB7ciwgd2FybmluZz1GLCBtZXNzYWdlPUZ9DQpoc2UgPC0gcmVhZF9kdGEoImh0dHBzOi8vZ2l0aHViLmNvbS9BLW1vcmEvTUxNX3N1bW1lci1zY2hvb2wvcmF3L21haW4vZGF0YS9oc2VfZGF0YV9mb3Jfd29ya3Nob3AuZHRhIikNCmBgYA0KDQo8YnI+DQoNCioqKg0KDQojIyBTZWxlY3QgdmFyaWFibGVzIHRvIHVzZQ0KDQpUaGUgZGF0YXNldCBoYXMgbWFueSBkaWZmZXJlbnQgdmFyaWFibGVzLCBidXQgd2UncmUgbm90IGdvaW5nIHRvIGJlIHVzaW5nIGFsbCBvZiB0aGVtLCBzbyBmb3IgZWFzaWVyIHdvcmssIHdlIHdpbGwgc2VsZWN0IHRoZSBmb2xsb3dpbmc6IGB5ZWFyYCwgYHBzZXJpYWxgLCBgYXJlYWAsIGBibWl2YWxgLCBgc2V4YCwgYGFnZWAgYW5kIGBldGhuaWNgLg0KDQpgeWVhcmAgaXMgdGhlIHllYXIgd2hlcmUgdGhlIG1lYXN1cmVzIHdlcmUgdGFrZW4NCg0KYHBzZXJpYWxgIGlzIHRoZSBhbm9ueW1pc2VkIHBlcnNvbiBpZGVudGlmaWVyDQoNCmBhcmVhYCBpcyB0aGUgYW5vbnltaXNlZCBwb3N0Y29kZSBvZiB0aGUgcGVyc29uDQoNCmBibWl2YWxgIGlzIHRoZSB2YWxpZCBtZWFzdXJlIG9mIEJNSQ0KDQpgc2V4YCBjb2RlZCAwIGZvciBNZW4gYW5kIDEgZm9yIFdvbWVuDQoNCmBhZ2VgIGZyb20gMCB0byA5OQ0KDQpgZXRobmljYCBjb2RlZCAxIGZvciBXaGl0ZTsgDQogICAgICAgICAgICAgICAyIGZvciBNaXhlZDsgDQogICAgICAgICAgICAgICAzIGZvciBBc2lhbiBvciBBc2lhbiBCcml0aXNoOyANCiAgICAgICAgICAgICAgIDQgZm9yIEJsYWNrIG9yIEJsYWNrIEJyaXRpc2ggYW5kIA0KICAgICAgICAgICAgICAgNSBmb3IgQ2hpbmVzZSBvciBhbnkgb3RoZXIgZ3JvdXANCg0KRm9yIGEgZGV0YWlsZWQgZGVzY3JpcHRpb24gb2YgdGhlc2UgdmFyaWFibGVzLCBoYXZlIGEgbG9vayBpbiB0aGUgZG9jdW1lbnRhdGlvbiBkb3dubG9hZGVkIGFsb25nc2lkZSB3aXRoIHRoZSBkYXRhLiANCioqU3BvaWxlciBhbGVydDoqKiBZb3Ugd2lsbCBhbHNvIGZpbmQgYSBjb21wbGV0ZSBzZXQgb2YgbWF0ZXJpYWxzIGZvciBhIHdvcmtzaG9wIG9uIE1MTS4NCg0KVG8gc2VsZWN0IHZhcmlhYmxlcywgd2UgKHVuc3VycHJpc2luZ2x5KSBuZWVkIHRvIHVzZSB0aGUgZnVuY3Rpb24gYHNlbGVjdGAgb2YgdGhlIGBkcGx5cmAgcGFja2FnZToNCg0KYGBge3IsIHdhcm5pbmc9RiwgbWVzc2FnZT1GfQ0KDQpoc2UyIDwtIHNlbGVjdChoc2UsIHllYXIsIHBzZXJpYWwsIGFyZWEsIGJtaXZhbCwgc2V4LCBhZ2UsIGV0aG5pYywgYm1pdmFsKSANCg0KYGBgDQoNCjxicj4NCg0KKioqDQojIFByZWxpbWluYXJ5IHRhc2tzDQoNCldlIG5lZWQgdG8gZGljaG90b21pc2Ugb3VyIGRlcGVuZGVudCB2YXJpYWJsZSBgYm1pdmFsYC4gQXMgd2UgbWVudGlvbmVkIGJlZm9yZSwgdGhlIGNhdGVnb3JpZXMgIm92ZXJ3ZWlnaHQiIGFuZCAib2Jlc2UiIGFyZSBmb3IgdGhvc2Ugd2l0aCBhIEJNSSBvdmVyIDI1IGFuZCAzMCwgcmVzcGVjdGl2ZWx5LCBzbyB3ZSBuZWVkIHRvIGRvIHRoZSBmb2xsb3dpbmcgdG8gb3VyIGNvbnRpbnVvdXMgQk1JIG1lYXN1cmU6DQoNCmBgYHtyLCB3YXJuaW5nPUYsIG1lc3NhZ2U9Rn0NCmhzZTIkYm1pX2JpbiA8LSBpZmVsc2UoaHNlMiRibWl2YWwgPj0gMjUsIDEsIDApDQpgYGANCg0KVG8gY2hlY2sgdGhpcyBpcyBkb25lIGNvcnJlY3RseSwgeW91IGNhbiBydW4gYSBzaW1wbGUgZnJlcXVlbmN5IHRhYmxlOg0KDQpgYGB7ciwgd2FybmluZz1GLCBtZXNzYWdlPUZ9DQp0YWJsZShoc2UyJGJtaV9iaW4pDQpgYGANCg0KSWYgdGhlcmUgYXJlIG1vcmUgdGhhbiB0d28gdmFsdWVzIHRoZXJlLCB0aGVuIHNvbWV0aGluZyBtdXN0IGhhdmUgZ29uZSB3cm9uZy4NCg0KQWxzbywgZ2l2ZW4gdGhhdCB0aGUgQk1JIGluIGNoaWxkcmVuIGlzIGRvbmUgZGlmZmVyZW50bHksIHdlIHdpbGwgcmVtb3ZlIGFsbCB1bmRlci0xOCBpbmRpdmlkdWFscy4gV2UgZG8gdGhpcyBieSB0eXBpbmc6DQoNCmBgYHtyLCB3YXJuaW5nPUYsIG1lc3NhZ2U9Rn0NCmhzZTIgPC0gaHNlMiAlPiUgZmlsdGVyKGFnZT4xOCkNCmBgYA0KDQojIFRhc2sgMTogRml0IGFuIGVtcHR5IG1vZGVsDQoNCldlIHdpbGwgc3RhcnQgYnkgZml0dGluZyBhbiBlbXB0eSBtdWx0aWxldmVsIG1vZGVsIGZvciB0aGUgcHJvcGVuc2l0eSBvZiBiZWluZyBvdmVyd2VpZ2h0IGluIHBlb3BsZSBuZXN0ZWQgaW4gYXJlYXMuDQoNCmBgYHtyLCB3YXJuaW5nPUYsIG1lc3NhZ2U9Rn0NCmVtcHR5IDwtIGdsbWVyKGJtaV9iaW4gfiAxICsgKDF8YXJlYSksIGRhdGEgPSBoc2UyLCBmYW1pbHkgPSBiaW5vbWlhbCgibG9naXQiKSkNCg0Kc3VtbWFyeShlbXB0eSkNCmBgYA0KDQoNCjxicj4NCg0KIyMjIFF1ZXN0aW9uczoNCg0KMS4xIFdoYXQgaXMgdGhlIG92ZXJhbGwgcHJvYmFiaWxpdHkgb2YgYmVpbmcgb3ZlcndlaWdodD8NCg0KUmVtZW1iZXIgdGhpcyBmb3JtdWxhOg0KDQokJGxvZ2l0KHBfaSk9XGxvZ1xsZWZ0KFxmcmFje3Bfe2l9fXsxLXBfe2l9fVxyaWdodCkkJA0KVG8gZ2V0IHRoZSBvZGRzIGZyb20gdGhlIGVzdGltYXRlZCBjb2VmZmljaWVudHMsIHlvdSB1c2UgdGhlIGV4cG9uZW50IGZ1bmN0aW9uOg0KDQokJGV4cChcYmV0YSk9b2RkcyQkDQoNClRoZW4sIHRvIGNvbnZlcnQgdG8gcHJvYmFiaWxpdHksIHlvdSBjYW4gZG8gdGhpczoNCg0KJCRwID0gXGZyYWN7b2Rkc317MSArIG9kZHN9JCQNCmBgYHtyLCB3YXJuaW5nPUYsIG1lc3NhZ2U9Rn0NCg0Kb2RkcyA8LSBleHAoZW1wdHlAYmV0YSkgIyB0aGlzIGlzIHRvIHJldHJpZXZlIHRoZSBpbnRlcmNlcHQgZnJvbSB0aGUgbW9kZWwNCg0KcHJvYiA8LSBvZGRzLygxICsgb2RkcykgIyB0byBlc3RpbWF0ZSB0aGUgb3ZlcmFsbCBwcm9iYWJpbGl0eQ0KDQpwcm9iICMgdG8gcHJpbnQgdGhlIHJlc3VsdCB0byB0aGUgc2NyZWVuDQpgYGANCg0KDQoxLjIgV2hhdCBpcyB0aGUgVlBDIGZvciB0aGlzIG1vZGVsPw0KDQokJFZQQyA9IFxmcmFje1xzaWdtYV91XjJ9e1xzaWdtYV91XjIgKyBcc2lnbWFfZV4yKn0kJA0Kd2hlcmUgJFxzaWdtYV9lXjIqPSBcZnJhY3tccGleMn17M30gXGFwcHJveCAzLjI5JA0KDQpgYGB7ciwgd2FybmluZz1GLCBtZXNzYWdlPUZ9DQpsZXYydmFyIDwtIGFzLm51bWVyaWMoVmFyQ29ycihlbXB0eSkpICMgdGhpcyBpcyB0byByZXRyaWV2ZSB0aGUgbGV2ZWwgMiB2YXJpYW5jZSBmcm9tIHRoZSBtb2RlbA0KDQoobGV2MnZhcikvKGxldjJ2YXIrMy4yOSkgIyBWUEMNCmBgYA0KDQo8YnI+DQoNCioqKg0KDQojIFRhc2sgMjogSXMgdGhlIE1MTSBiZXR0ZXIgdGhhbiBhIHNpbmdsZS1sZXZlbCBtb2RlbD8NCg0KVG8gYXNzZXNzIHRoZSBzdGF0aXN0aWNhbCBzaWduaWZpY2FuY2Ugb2YgdGhlIE1MTSwgd2UgbmVlZCB0byBjb21wYXJlIGl0IHRvIGEgc2luZ2xlLWxldmVsIG1vZGVsLiBUbyBmaXQgYSBzaW5nbGUtbGV2ZWwgbW9kZWwsIHdlIHR5cGU6DQoNCmBgYHtyLCB3YXJuaW5nPUYsIG1lc3NhZ2U9Rn0NCg0Kc2luZ2xlIDwtIGdsbShibWlfYmluIH4gMSAsIGRhdGEgPSBoc2UyLCBmYW1pbHkgPSBiaW5vbWlhbCgibG9naXQiKSkNCg0Kc3VtbWFyeShzaW5nbGUpDQoNCmBgYA0KDQpUaGVzZSByZXN1bHRzIGFyZSBub3QgdmVyeSBpbnRlcmVzdGluZyBpbiB0aGVtc2VsdmVzLCBzbyB3ZSBtb3ZlIG9uIGV4dHJhY3QgdGhlIGxvZ2xpa2VsaWhvb2QgYW5kIGNvbXBhcmUgdG8gdGhlIE1MTS4NCg0KYGBge3IsIHdhcm5pbmc9RiwgbWVzc2FnZT1GfQ0KDQpMMSA8LSBhcy5udW1lcmljKGxvZ0xpayhzaW5nbGUpKSAjIHN0b3JlIHRoaXMgYXMgbnVtZXJpY2FsIHRvIHJlLXVzZQ0KTDIgPC0gYXMubnVtZXJpYyhsb2dMaWsoZW1wdHkpKQ0KDQooRCA8LSAyKihMMi1MMSkpICMgdGhpcyBpcyB0aGUgZGV2aWFuY2UsIHdlIHB1dCBpdCB3aXRoaW4gYnJhY2tldHMgdG8gcHJpbnQgaXQgaW1tZWRpYXRlbHkNCg0KcGNoaXNxKHE9RCwgZGY9MSwgbG93ZXIudGFpbD1GKSAjIFRvIGZpbmQgdGhlIHAtdmFsdWUNCg0KYGBgDQoNCiMjIyBRdWVzdGlvbg0KDQoyLjEuIElzIHRoZSBhZGRpdGlvbiBvZiB0aGUgYXJlYSBsZXZlbCBzdGF0aXN0aWNhbGx5IHNpZ25pZmljYW50Pw0KDQoyLjIuIFdoYXQgZG9lcyB0aGlzIG1lYW4gaW4gcHJhY3RpY2U/DQoNCioqKg0KDQojIFRhc2sgMzogUmFuZG9tIGludGVyY2VwdHMgbW9kZWwNCg0KSnVzdCBsaWtlIGluIHRoZSBjYXNlIG9mIG5vcm1hbGx5LWRpc3RyaWJ1dGVkIHJlc3BvbnNlcywgd2UgY2FuIGZpdCBhIGByYW5kb20gaW50ZXJjZXB0c2AgbW9kZWwgYnkgYWRkaW5nIGV4cGxhbmF0b3J5IHZhcmlhYmxlcy4NCg0KV2Ugd2FudCB0byBmaW5kIG91dCB3aGV0aGVyIHRoZXJlIGFueSBkaWZmZXJlbmNlcyBiZXR3ZWVuIG1hbGVzIGFuZCBmZW1hbGVzIG9uIHRoZSBwcm9iYWJpbGl0eSBvZiBiZWluZyBvdmVyd2VpZ2h0Lg0KDQpgYGB7ciwgd2FybmluZz1ULCBtZXNzYWdlPUZ9DQpyYW5kX2ludCA8LSBnbG1lcihibWlfYmluIH4gZmFjdG9yKHNleCkgKyAoMXxhcmVhKSwgZGF0YSA9IGhzZTIsIGZhbWlseSA9IGJpbm9taWFsKCJsb2dpdCIpKQ0KDQpzdW1tYXJ5KHJhbmRfaW50KQ0KYGBgDQoNCldlIGNhbiBhbHNvIGdldCBhIG1vcmUgImh1bWFuLXJlYWRhYmxlIiB2ZXJzaW9uIG9mIHRoZSB0YWJsZSBvZiBjb2VmZmljaWVudHMgYnkgdXNpbmcgdGhlIHBhY2thZ2UgYGJyb29tLm1peGVkYDoNCg0KYGBge3IsIHdhcm5pbmc9RiwgbWVzc2FnZT1GfQ0KKG0xIDwtIHRpZHkocmFuZF9pbnQsIGVmZmVjdHMgPSAiZml4ZWQiLA0KICAgICAgICAgIGNvbmYuaW50PVRSVUUsIA0KICAgICAgICAgIGV4cG9uZW50aWF0ZT1GQUxTRSkpDQpgYGANCg0KWW91IGNhbiBwbG90IHRoZXNlIGZvciBlYXNpZXIgaW5zcGVjdGlvbjoNCg0KYGBge3J9DQoobTFfcGxvdCA8LSANCiAgICBnZ3Bsb3QobTEsIA0KICAgICAgICAgICBtYXBwaW5nID0gYWVzKHg9IGVzdGltYXRlLA0KICAgICAgICAgICAgICAgICAgICAgICAgIHkgPSB0ZXJtLCANCiAgICAgICAgICAgICAgICAgICAgICAgICB4bWluID0gY29uZi5sb3csIA0KICAgICAgICAgICAgICAgICAgICAgICAgIHhtYXggPSBjb25mLmhpZ2gpKSArDQogICAgZ2VvbV92bGluZSh4aW50ZXJjZXB0ID0gMCwgY29sb3IgPSAidG9tYXRvIiwgc2l6ZSA9MSkgKw0KICAgIGdlb21fcG9pbnRyYW5nZSgpICsNCiAgICB0aGVtZV9jbGFzc2ljKCkpDQpgYGANCg0KSWYgeW91IHdhbnQgdG8gb2J0YWluIHRoZSBvZGRzIHJhdGlvcywgeW91IGNhbiBjaGFuZ2UgdGhlIG9wdGlvbiBgZXhwb25lbnRpYXRlYCB0byBgVFJVRWAuDQoNCmBgYHtyLCB3YXJuaW5nPUYsIG1lc3NhZ2U9Rn0NCihtMV9vZGRzIDwtIHRpZHkocmFuZF9pbnQsIGVmZmVjdHMgPSAiZml4ZWQiLA0KICAgICAgICAgIGNvbmYuaW50PVRSVUUsIA0KICAgICAgICAgIGV4cG9uZW50aWF0ZT1UUlVFKSkNCmBgYA0KDQpVbnN1cnByaXNpbmdseSwgeW91IGNhbiBwbG90IHRoZSBvZGRzIGZvciBlYXNpZXIgaW5zcGVjdGlvbjoNCg0KYGBge3J9DQoobTFfb2Rkc19wbG90IDwtIA0KICAgIGdncGxvdChtMV9vZGRzLCANCiAgICAgICAgICAgbWFwcGluZyA9IGFlcyh4PSBlc3RpbWF0ZSwNCiAgICAgICAgICAgICAgICAgICAgICAgICB5ID0gdGVybSwgDQogICAgICAgICAgICAgICAgICAgICAgICAgeG1pbiA9IGNvbmYubG93LCANCiAgICAgICAgICAgICAgICAgICAgICAgICB4bWF4ID0gY29uZi5oaWdoKSkgKw0KICAgIGdlb21fdmxpbmUoeGludGVyY2VwdCA9IDEsIGNvbG9yID0gInRvbWF0byIsIHNpemUgPTEpICsNCiAgICBnZW9tX3BvaW50cmFuZ2UoKSArDQogICAgdGhlbWVfY2xhc3NpYygpKQ0KYGBgDQoNCiMjIyBRdWVzdGlvbjoNCg0KMy4xLiBXaGF0IGlzIHRoZSBlZmZlY3Qgb2Ygc2V4IG9uIGJlaW5nIG92ZXJ3ZWlnaHQ/DQoNCjMuMi4gV2hhdCBpcyB0aGUgcHJvYmFiaWxpdHkgb2YgYSBmZW1hbGUgYmVpbmcgb3ZlcndlaWdodCBpbiB0aGlzIHNhbXBsZT8NCg0KKioqDQoNCiMgVGFzayA0OiBBcmVhLXNwZWNpZmljIGVzdGltYXRlcw0KDQpKdXN0IGxpa2UgaW4gdGFzayA1IG9mIHByYWN0aWNhbCAyLCB3ZSBjYW4gcmV0cmlldmUgdGhlIHJlc2lkdWFscyBmcm9tIHRoZSBgcmFuZG9tIGludGVyY2VwdHNgIGFuZCBwbG90IHRoZW0gdG8gZmluZCBvdXQgd2hpY2ggYXJlYXMgaGF2ZSBtb3JlIG9yIGxlc3MgdGhhbiBhdmVyYWdlIHBlb3BsZSB3aG8gYXJlIG92ZXJ3ZWlnaHQuDQoNClRoaXMgaXMgd2hhdCBpcyBzb21ldGltZXMgY2FsbGVkIGluIHRoZSBsaXRlcmF0dXJlIGEgIkNhdGVycGlsbGFyIHBsb3QiLg0KDQpgYGB7ciwgd2FybmluZz1GLCBtZXNzYWdlPUZ9DQptMiA8LSB0aWR5KHJhbmRfaW50LCBlZmZlY3RzID0gInJhbl92YWxzIiwNCiAgICAgICAgICBjb25mLmludD1UUlVFLA0KICAgICAgICAgIGV4cG9uZW50aWF0ZT1GQUxTRSkNCg0KKFJFIDwtIG0yICU+JQ0KICAgIG11dGF0ZShsZXZlbCA9IGZjdF9yZW9yZGVyKGxldmVsLCBlc3RpbWF0ZSkpICU+JQ0KICAgIGdncGxvdCggbWFwcGluZyA9IGFlcyh4PSBlc3RpbWF0ZSwNCiAgICAgICAgICAgICAgICAgICAgICAgICB5ID0gbGV2ZWwsIA0KICAgICAgICAgICAgICAgICAgICAgICAgIHhtaW4gPSBjb25mLmxvdywgDQogICAgICAgICAgICAgICAgICAgICAgICAgeG1heCA9IGNvbmYuaGlnaCkpICsNCiAgICBnZW9tX3ZsaW5lKHhpbnRlcmNlcHQgPSAwLCBjb2xvciA9ICJ0b21hdG8iLCBzaXplID0xKSArDQogICAgY29vcmRfZmxpcCgpICsNCiAgICBsYWJzKHggPSAibG9naXQiLA0KICAgICAgICAgeSA9ICJBcmVhcyIpICsNCiAgICBnZW9tX3BvaW50cmFuZ2UoKSArDQogICAgdGhlbWVfY2xhc3NpYygpKQ0KDQpgYGANCg0KIyMjIFF1ZXN0aW9uOg0KDQo0LjEuIEFyZSB0aGVyZSBhbnkgYXJlYXMgdGhhdCBhcmUgc2lnbmlmaWNhbnRseSBhYm92ZSBvciBiZWxvdyBhdmVyYWdlPw0KDQoqKioNCg0KIyBBZGRpdGlvbmFsIHRhc2tzDQoNCllvdSBjYW4gYm9ycm93IGZyb20gcHJhY3RpY2FsIDIgYW5kIHJlcGVhdCBzb21lIG9mIHRoZSB0YXNrcyB0aGVyZSwgc3VjaCBhczoNCg0KLSBhZGRpbmcgbW9yZSBleHBsYW5hdG9yeSB2YXJpYWJsZXMgDQoNCi0gYWRkaW5nIGludGVyYWN0aW9uIGVmZmVjdHMNCg0KLSBwbG90IHByZWRpY3Rpb25zLg==</div>
+
+
+</div>
+</div>
+
+</div>
+
+<script>
+
+// add bootstrap table styles to pandoc tables
+function bootstrapStylePandocTables() {
+  $('tr.odd').parent('tbody').parent('table').addClass('table table-condensed');
+}
+$(document).ready(function () {
+  bootstrapStylePandocTables();
+});
+
+
+</script>
+
+<!-- tabsets -->
+
+<script>
+$(document).ready(function () {
+  window.buildTabsets("TOC");
+});
+
+$(document).ready(function () {
+  $('.tabset-dropdown > .nav-tabs > li').click(function () {
+    $(this).parent().toggleClass('nav-tabs-open');
+  });
+});
+</script>
+
+<!-- code folding -->
+<script>
+$(document).ready(function () {
+  window.initializeSourceEmbed("Practical_3.Rmd");
+});
+</script>
+
+<script>
+$(document).ready(function ()  {
+
+    // temporarily add toc-ignore selector to headers for the consistency with Pandoc
+    $('.unlisted.unnumbered').addClass('toc-ignore')
+
+    // move toc-ignore selectors from section div to header
+    $('div.section.toc-ignore')
+        .removeClass('toc-ignore')
+        .children('h1,h2,h3,h4,h5').addClass('toc-ignore');
+
+    // establish options
+    var options = {
+      selectors: "h1,h2,h3,h4",
+      theme: "bootstrap3",
+      context: '.toc-content',
+      hashGenerator: function (text) {
+        return text.replace(/[.\\/?&!#<>]/g, '').replace(/\s/g, '_');
+      },
+      ignoreSelector: ".toc-ignore",
+      scrollTo: 0
+    };
+    options.showAndHide = true;
+    options.smoothScroll = true;
+
+    // tocify
+    var toc = $("#TOC").tocify(options).data("toc-tocify");
+});
+</script>
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>
