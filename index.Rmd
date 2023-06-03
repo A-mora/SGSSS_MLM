@@ -40,7 +40,7 @@ This six-hour workshop will give you an introduction to Multilevel Modelling thr
 
 ## Materials
 
-- Here you can see the <a href="https://a-mora.github.io/summer_school_mlm/#1" target="_blank">Slides</a>  
+- Here you can see the <a href="https://a-mora.github.io/summer_school_mlm_slides/" target="_blank">Slides</a>  
 - To see the practicals, you can navigate through the tabs at the top.
 
 </br>
